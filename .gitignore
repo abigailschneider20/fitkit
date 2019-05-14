@@ -1,0 +1,6 @@
+env/
+secrets.sh
+*.pyc
+ratings/
+ratings/solution
+app-env.sh
