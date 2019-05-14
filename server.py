@@ -29,8 +29,15 @@ app.jinja_env.undefined = StrictUndefined
 @app.route('/')
 def index():
     """Homepage."""
-    return "<html><body>Placeholder for the homepage.</body></html>"
-    # return render_template("homepage.html")
+    return render_template('index.html')
+
+@app.route('/login', methods = ['POST'])
+def login():
+    email = request.forms.get('email')
+    password = request.forms.get('password')
+    
+    return render_template('login.html')
+
 
 @app.route('/fitbitdata', methods = ['GET'])
 def export_fitbitdata():
@@ -58,7 +65,7 @@ def export_fitbitdata():
 
     else:
         flash('Please provide all of the required information')
-        return redirect('/fitbitdatas')
+        return redirect('/fitbitdata')
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the

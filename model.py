@@ -20,19 +20,17 @@ class User(db.Model):
     user_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     email = db.Column(db.String(80), nullable=True)
     password = db.Column(db.String(40), nullable=True)
-    has_signed_hipaa = db.Column(Boolean, nullable=True)
+    has_signed_hipaa = db.Column(db.Boolean, default = True)
 
     def __repr__(self):
-    """Provide helpful representation when printed."""
-
         return f"<User user_id={self.user_id} email={self.email}>"
 
 class DailyMetric(db.Model):
-    """Metrics of users of app"""
+    """Daily metrics of users of app"""
 
-    __tablename__ = "daily metrics"
+    __tablename__ = "dailymetrics"
 
-    entry_id = db.Column(db.Integer, autoicrement=True, primary_key=True)
+    entry_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
     steps_walked = db.Column(db.Integer, nullable = True)
     mins_slept = db.Column(db.Integer, nullable = True)
@@ -45,16 +43,14 @@ class DailyMetric(db.Model):
                             backref = db.backref('dailymetrics', 
                                 order_by = user_id))
     def __repr__(self):
-    """Provide helpful representation when printed."""
-
         return f"<Daily Metric user_id={self.user_id} entry_id={self.entry_id}>"
 
 class WeeklyMetric(db.Model):
-    """Metrics of users of app"""
+    """Weekly metrics of users of app"""
 
-    __tablename__ = "weekly metrics"
+    __tablename__ = "weeklymetrics"
 
-    entry_id = db.Column(db.Integer, autoicrement=True, primary_key=True)
+    entry_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
     avg_steps_walked = db.Column(db.Integer, nullable = True)
     avg_mins_slept = db.Column(db.Integer, nullable = True)
@@ -67,16 +63,14 @@ class WeeklyMetric(db.Model):
                             backref = db.backref('weeklymetrics', 
                                 order_by = user_id))
     def __repr__(self):
-    """Provide helpful representation when printed."""
-
         return f"<Weekly Metric user_id={self.user_id} entry_id={self.entry_id}>"
 
 class MonthlyMetric(db.Model):
     """Metrics of users of app"""
 
-    __tablename__ = "monthly metrics"
+    __tablename__ = "monthlymetrics"
 
-    entry_id = db.Column(db.Integer, autoicrement=True, primary_key=True)
+    entry_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
     avg_steps_walked = db.Column(db.Integer, nullable = True)
     avg_mins_slept = db.Column(db.Integer, nullable = True)
@@ -90,14 +84,12 @@ class MonthlyMetric(db.Model):
                                 order_by = user_id))
 
     def __repr__(self):
-    """Provide helpful representation when printed."""
-
         return f"<Monthly Metric user_id={self.user_id} entry_id={self.entry_id}>"
 
 class PHQ(db.Model):
     """User question values for PHQ9"""
 
-    __tablename__ = "PHQ9"
+    __tablename__ = "phq"
 
     phq_id = db.Column(db.Integer, autoincrement = True, primary_key = True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
@@ -120,14 +112,12 @@ class PHQ(db.Model):
                                 order_by = user_id))
 
     def __repr__(self):
-    """Provide helpful representation when printed."""
-
         return f"<PHQ user_id={self.user_id} PHQ_ID={self.phq_id}>"
 
-class GAD(db.Model)
+class GAD(db.Model):
     """User question values for GAD7"""
 
-    __tablename__ = "GAD7"
+    __tablename__ = "gad"
 
     gad_id = db.Column(db.Integer, autoincrement = True, primary_key = True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
@@ -146,9 +136,8 @@ class GAD(db.Model)
                             backref = db.backref('gad', 
                                 order_by = user_id))
     def __repr__(self):
-    """Provide helpful representation when printed."""
-
         return f"<GAD user_id={self.user_id} GAD ID ={self.gad_id}>"
+
 class Sleep(db.Model):
     """User question values for Sleep Questionnaire"""
 
@@ -157,8 +146,18 @@ class Sleep(db.Model):
     sleep_id = db.Column(db.Integer, autoincrement = True, primary_key = True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
     date = db.Column(db.DateTime)
-    q1_answer = db.Column(db.Integer, nullable = True) #how long in mins to fall asleep
+    q1_answer = db.Column(db.Integer, nullable = True) 
     q2_answer = db.Column(db.Integer, nullable= True)
+    q3_answer = db.Column(db.Integer, nullable = True)
+    q4_answer = db.Column(db.Integer, nullable = True)
+    q5_answer = db.Column(db.Integer, nullable = True)
+    q6_answer = db.Column(db.Integer, nullable = True)
+    q7_answer = db.Column(db.Integer, nullable = True)
+    q8_answer = db.Column(db.Integer, nullable = True)
+    q9_answer = db.Column(db.Integer, nullable = True)
+    q10_answer = db.Column(db.Integer, nullable= True)
+    score = db.Column(db.Integer, nullable = True)
+    insomnia_severity = db.Column(db.String(20), nullable = True)
 
 
     user = db.relationship('User', 
@@ -166,8 +165,6 @@ class Sleep(db.Model):
                                 order_by = user_id))
 
     def __repr__(self):
-    """Provide helpful representation when printed."""
-
         return f"<Sleep user_id={self.user_id} Sleep ID={self.sleep_id}>"
 
 ##############################################################################
@@ -184,8 +181,6 @@ def connect_to_db(app):
 
 
 if __name__ == "__main__":
-    # As a convenience, if we run this module interactively, it will leave
-    # you in a state of being able to work with the database directly.
 
     from server import app
     connect_to_db(app)
