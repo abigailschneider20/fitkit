@@ -4,11 +4,12 @@ from jinja2 import StrictUndefined
 import os
 from pprint import pformat
 
+
 import requests
 from flask import Flask, render_template, request, flash, redirect, session
 from flask_debugtoolbar import DebugToolbarExtension
 
-from model import connect_to_db, db, User, DailyMetric, WeeklyMetric, MonthlyMetric, PHQ, GAD, Sleep
+from model import connect_to_db, db, User, DailyMetric, PHQ, GAD, Sleep
 
 
 app = Flask(__name__)
@@ -16,13 +17,9 @@ app = Flask(__name__)
 # Required to use Flask sessions and the debug toolbar
 app.secret_key = "SECRET"
 
-FITBIT_TOKEN = os.environ.get('TOKEN')
-FITBIT_URL = 'https://api.fitbit.com/1/user/-/'
-USER_ID = '6RJR2N'
+FITBIT_TOKEN = os.environ.get('FITBIT_TOKEN')
+USER_ID = os.environ.get('USER_ID')
 
-# Normally, if you use an undefined variable in Jinja2, it fails
-# silently. This is horrible. Fix this so that, instead, it raises an
-# error.
 app.jinja_env.undefined = StrictUndefined
 
 
@@ -39,11 +36,11 @@ def register_form():
 @app.route('/register', methods = ['POST'])
 def process_registration():
     """Process new user registration"""
-    email = request.form.get('password')
-    password = request.form.get('email')
+    email = request.form.get('email')
+    password = request.form.get('password')
 
     new_user = User(email = email, password = password)
-    
+    print (new_user)
     db.session.add(new_user)
     db.session.commit()
     session['user_id'] = new_user.user_id
@@ -115,33 +112,58 @@ def show_fitbit_form():
 
 @app.route('/fitbitdata', methods = ['GET'])
 def export_fitbitdata():
-    date1 = request.args.get('date1')
-    date2 = request.args.get('date2') #Will get date for fitbit data request
-    type_of_data = request.args.get('type') #Will get whether user wants hr, sleep, or activity data
+    date1 = request.args.get('date1') 
+    date2 = request.args.get('date2', None) #Will get date for fitbit data request
+    type_of_data = request.args.get('type')
+    print(type_of_data) #Will get whether user wants hr, sleep, or activity data
     
-    if date1 and type_of_data:
-        payload = {'activity': type_of_data,
-                    'date1': date1,
-                    'date2': date2,}
+    if session['user_id'] == 1:
+        if date1 and type_of_data:
+            if type_of_data == 'heart':
+                url = f"https://api.fitbit.com/1/user/-/activities/date/{date1}/{date2}"
+                # url = f"https://api.fitbit.com/1/user/-/activities/heart/date/{date1}/{date2}.json" #f string
+            elif type_of_data == 'activities':
+                url = f"https://api.fitbit.com/1/user/-/activities/date/{date1}/{date2}.json"
+            else:
+                url = f"https://api.fitbit.com/1.2/user/-/sleep/date/{date1}/{date2}.json"
 
-        headers = {'Authorization': 'Bearer ' + TOKEN}
-        response = requests.get(FITBIT_URL, params = payload, headers = headers)
-        data = response.json()
-        data = pprint(data)
+            headers = {'Authorization': 'Bearer ' + FITBIT_TOKEN}
+            response = requests.get(url, headers = headers)
+            data = response.json()
+            data = pformat(data)
 
-        if response.ok:
-            print(data)
-            # data = data
-            pass #figure out what to parse in data/response from FitBit API
+            if response.ok:
+                print(data)
+                # data = data
+                pass #figure out what to parse in data/response from FitBit API
+                #weather sunlight correlation to mental health
+                #endpoint that returns dynamic image of chart to front end
+                #function to retrieve daily data and range data, initial load, can be same function with optional parameter
+                #Write code that populates the table; function can be run as a python script, not a Flask endpoint; ETL, add to db
+                #transform to integer, load into database. Manually run it and load database. Could add to flask endpoint
+                #start by creating python script to continuously grab the data, transform it, load it to db instaed of reloading browser
+                #implement print messages; import requests, import psql/SQLA, and tables; script lives in same directory as models
+                #Use sql to get aggregate data SQLA
+            else:
+                flash('Sorry, we could not access your FitBit data.')
+
+                return render_template('fitbitdata.html', data = pformat(data), results = results)
 
         else:
-            flash('Sorry, we could not access your FitBit data.')
+            flash('Please provide all of the required information')
+            return redirect('/fitbitdata')
 
-            return render_template('fitbitdata.html', data = pformat(data), results = results)
+#     else:
+#         #use Mockaroo to generate random entries depending on condition assigned
+#         #Anxiety = 0.18, Depression = 0.08, Insomnia = 0.25
 
-    else:
-        flash('Please provide all of the required information')
-        return redirect('/fitbitdata')
+@app.route('/newtest', methods = ['GET'])
+def navigate_to_tests():
+    return render_template('newtest.html')
+
+@app.route('/newtest', methods = ['POST'])
+def insert_answers_into_db():
+    return redirect ('/user_profile')
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the

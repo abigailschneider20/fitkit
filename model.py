@@ -20,7 +20,7 @@ class User(db.Model):
     user_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     email = db.Column(db.String(80), nullable=True)
     password = db.Column(db.String(40), nullable=True)
-    has_signed_hipaa = db.Column(db.Boolean, default = False)
+    has_signed_hipaa = db.Column(db.Boolean, default = True)
 
     def __repr__(self):
         return f"<User user_id={self.user_id} email={self.email}>"
@@ -45,46 +45,48 @@ class DailyMetric(db.Model):
     def __repr__(self):
         return f"<Daily Metric user_id={self.user_id} entry_id={self.entry_id}>"
 
-class WeeklyMetric(db.Model):
-    """Weekly metrics of users of app"""
+# class WeeklyMetric(db.Model):
+#     """Weekly metrics of users of app"""
+#     #randomg JSON file to load recent data; function; three profiles: mock data loaded into db
+#     #
 
-    __tablename__ = "weeklymetrics"
+#     __tablename__ = "weeklymetrics"
 
-    entry_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
-    avg_steps_walked = db.Column(db.Integer, nullable = True)
-    avg_mins_slept = db.Column(db.Integer, nullable = True)
-    avg_mins_exercise = db.Column(db.Integer, nullable = True)
-    avg_resting_hr = db.Column(db.Integer, nullable = True)
-    start_date = db.Column(db.DateTime)
-    end_date = db.Column(db.DateTime)
+#     entry_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
+#     avg_steps_walked = db.Column(db.Integer, nullable = True)
+#     avg_mins_slept = db.Column(db.Integer, nullable = True)
+#     avg_mins_exercise = db.Column(db.Integer, nullable = True)
+#     avg_resting_hr = db.Column(db.Integer, nullable = True)
+#     start_date = db.Column(db.DateTime)
+#     end_date = db.Column(db.DateTime)
 
-    user = db.relationship('User', 
-                            backref = db.backref('weeklymetrics', 
-                                order_by = user_id))
-    def __repr__(self):
-        return f"<Weekly Metric user_id={self.user_id} entry_id={self.entry_id}>"
+#     user = db.relationship('User', 
+#                             backref = db.backref('weeklymetrics', 
+#                                 order_by = user_id))
+#     def __repr__(self):
+#         return f"<Weekly Metric user_id={self.user_id} entry_id={self.entry_id}>"
 
-class MonthlyMetric(db.Model):
-    """Metrics of users of app"""
+# class MonthlyMetric(db.Model):
+#     """Metrics of users of app"""
 
-    __tablename__ = "monthlymetrics"
+#     __tablename__ = "monthlymetrics"
 
-    entry_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
-    avg_steps_walked = db.Column(db.Integer, nullable = True)
-    avg_mins_slept = db.Column(db.Integer, nullable = True)
-    avg_mins_exercise = db.Column(db.Integer, nullable = True)
-    avg_resting_hr = db.Column(db.Integer, nullable = True)
-    start_date = db.Column(db.DateTime)
-    end_date = db.Column(db.DateTime)
+#     entry_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
+#     avg_steps_walked = db.Column(db.Integer, nullable = True)
+#     avg_mins_slept = db.Column(db.Integer, nullable = True)
+#     avg_mins_exercise = db.Column(db.Integer, nullable = True)
+#     avg_resting_hr = db.Column(db.Integer, nullable = True)
+#     start_date = db.Column(db.DateTime)
+#     end_date = db.Column(db.DateTime)
 
-    user = db.relationship('User', 
-                            backref = db.backref('monthlymetrics', 
-                                order_by = user_id))
+#     user = db.relationship('User', 
+#                             backref = db.backref('monthlymetrics', 
+#                                 order_by = user_id))
 
-    def __repr__(self):
-        return f"<Monthly Metric user_id={self.user_id} entry_id={self.entry_id}>"
+#     def __repr__(self):
+#         return f"<Monthly Metric user_id={self.user_id} entry_id={self.entry_id}>"
 
 class PHQ(db.Model):
     """User question values for PHQ9"""

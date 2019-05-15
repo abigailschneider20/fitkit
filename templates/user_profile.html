@@ -4,7 +4,8 @@
 <div>
   <h1> FitKit Data for: {{ user.email }} </h1>
 
-
+  <h3> <form action = '/getfit' method = "GET"> <a href = "/getfit"> Access your FitBit data</a></form> </h3>
+  <span><h3> <form action = '/newtest' method = "GET"> <a href = "/newtest"> Take a new mental health test</a></form> </h3>
   {% if user.dailymetrics %}
 
     <h2>Daily Metrics</h2>
@@ -16,36 +17,6 @@
         <li>Active Minutes: {{metric.mins_exercise}} </li>
         <li>Sedentary Minutes: {{metric.mins_sedentary}} </li>
         <li>Resting Heart Rate: {{metric.resting_hr}} </li>
-
-    {% endfor %}
-    </ul>
-  {% endif %}
-
-    {% if user.weeklymetrics %}
-
-    <h2>Weekly Metrics</h2>
-    <ul>
-    {% for metric in user.weeklymetrics %}
-        <h3>Data for {{metric.start_date}} - {{metric.end_date}}: </h3> <br>
-        <li>Average Steps Walked: {{ metric.avg_steps_walked }}</li>
-        <li>Average Hours Slept: {{metric.avg_mins_slept//60}} hours and {{(metric.avg_mins_slept%60)}} minutes </li>
-        <li>Average Active Minutes: {{metric.avg_mins_exercise}} </li>
-        <li>Average Resting Heart Rate: {{metric.avg_resting_hr}} </li>
-
-    {% endfor %}
-    </ul>
-  {% endif %}
-
-    {% if user.monthlymetrics %}
-
-    <h2>Monthly Metrics</h2>
-    <ul>
-    {% for metric in user.monthlymetrics %}
-        <h3>Data for {{metric.start_date}} - {{metric.end_date}}: </h3> <br>
-        <li>Average Steps Walked: {{ metric.avg_steps_walked }}</li>
-        <li>Average Hours Slept: {{metric.avg_mins_slept//60}} hours and {{(metric.avg_mins_slept%60)}} minutes </li>
-        <li>Average Active Minutes: {{metric.avg_mins_exercise}} </li>
-        <li>Average Resting Heart Rate: {{metric.avg_resting_hr}} </li>
 
     {% endfor %}
     </ul>
@@ -91,5 +62,12 @@
     </ul>
   {% endif %} 
 </div>
+<footer>
+    <div>
+                  <form action = "/logout" method = "POST"> 
+                  <input type = "submit" value = "Log Out"> <!--    Show only when user is logged in using JS -->
+                 </form>
+            </div>
+        </footer>
 
 {% endblock %}

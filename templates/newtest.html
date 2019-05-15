@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<h2 class="form-signin-heading">Take a New Test</h2>
+    <form action="/newtest" method="POST">
+       <!-- insert calendar plugin function to get date1 and date2, unless only specify today -->
+    <!--    Find how to get data and input into db
+    Implement javascript to show/hide forms that have/have not been selected to be taken
+ -->
+       <select name = "testtype"> Select which test you would like to take:
+        <option value = "phq"> Patient Health Questionnaire (PHQ9: to assess degree of depression severity) </option>
+        <option value = "gad"> Generalized Anxiety Disorder (GAD7: to assess degree of anxiety severity) </option>
+        <option value = "sleep"> Sleep Questionnaire (To assess degree of insomnia severity) </option>
+        <button type="submit">Submit
+        </button>
+      </select>
+    </form>
+<!--       on submit, show/hide form selected to allow for completion of test. -->
+
+  <form action = "/phq" method = "POST">
+    <h3> Patient Health Questionnaire (PHQ9) </h3>
+    <h4> A nine question test designed to assess the degree of depression severity. </h4>
+  <h5> How often have you been bothered by the following over the past two weeks? </h5>
+    <body>
+      <div>
+        Question 1: Little interest or pleasure in doing things? <br> 
+        <input type = "radio" name = "q1" value = "0"> Not at All <br>
+        <input type = "radio" name = "q1" value = "1"> Several days <br>
+        <input type = "radio" name = "q1" value = "2"> More than half the days <br>
+        <input type = "radio" name = "q1" value = "3"> Nearly every day <br>
+
+      </div>
+    </body>
+
+
+
+
+    </form>
+
+{% endblock %}

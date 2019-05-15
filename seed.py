@@ -1,6 +1,6 @@
 from sqlalchemy import func
 
-from model import connect_to_db, db, User, DailyMetric, WeeklyMetric, MonthlyMetric, GAD, PHQ, Sleep
+from model import connect_to_db, db, User, DailyMetric, GAD, PHQ, Sleep
 from server import app
 
 
@@ -53,47 +53,47 @@ def load_dailymetrics():
 
 
 
-def load_weeklymetrics():
-    """Load weekly metrics from u.weeklymetric into database."""
-    WeeklyMetric.query.delete()
+# def load_weeklymetrics():
+#     """Load weekly metrics from u.weeklymetric into database."""
+#     WeeklyMetric.query.delete()
 
-    for row in open("seed_data/u.weeklymetrics"):
-        (entry_id, user_id, avg_steps_walked, 
-        avg_mins_slept, avg_mins_exercise,
-        avg_resting_hr, start_date, end_date) = row.split("|")
+#     for row in open("seed_data/u.weeklymetrics"):
+#         (entry_id, user_id, avg_steps_walked, 
+#         avg_mins_slept, avg_mins_exercise,
+#         avg_resting_hr, start_date, end_date) = row.split("|")
 
-        weeklymetric = WeeklyMetric(entry_id = entry_id,
-                                    user_id = user_id,
-                                    avg_steps_walked = avg_steps_walked,
-                                    avg_mins_slept = avg_mins_slept,
-                                    avg_mins_exercise = avg_mins_exercise,
-                                    avg_resting_hr = avg_resting_hr, 
-                                    start_date = start_date,
-                                    end_date = end_date)
-        db.session.add(weeklymetric)
+#         weeklymetric = WeeklyMetric(entry_id = entry_id,
+#                                     user_id = user_id,
+#                                     avg_steps_walked = avg_steps_walked,
+#                                     avg_mins_slept = avg_mins_slept,
+#                                     avg_mins_exercise = avg_mins_exercise,
+#                                     avg_resting_hr = avg_resting_hr, 
+#                                     start_date = start_date,
+#                                     end_date = end_date)
+#         db.session.add(weeklymetric)
 
-    db.session.commit()
+#     db.session.commit()
 
-def load_monthlymetrics():
-    """Load monthly metrics from u.monthlymetric into database."""
-    MonthlyMetric.query.delete()
+# def load_monthlymetrics():
+#     """Load monthly metrics from u.monthlymetric into database."""
+#     MonthlyMetric.query.delete()
 
-    for row in open("seed_data/u.monthlymetrics"):
-        (entry_id, user_id, avg_steps_walked, 
-        avg_mins_slept, avg_mins_exercise,
-        avg_resting_hr, start_date, end_date) = row.split("|")
+#     for row in open("seed_data/u.monthlymetrics"):
+#         (entry_id, user_id, avg_steps_walked, 
+#         avg_mins_slept, avg_mins_exercise,
+#         avg_resting_hr, start_date, end_date) = row.split("|")
 
-        monthlymetric = MonthlyMetric(entry_id = entry_id,
-                                    user_id = user_id,
-                                    avg_steps_walked = avg_steps_walked,
-                                    avg_mins_slept = avg_mins_slept,
-                                    avg_mins_exercise = avg_mins_exercise,
-                                    avg_resting_hr = avg_resting_hr, 
-                                    start_date = start_date,
-                                    end_date = end_date)
-        db.session.add(monthlymetric)
+#         monthlymetric = MonthlyMetric(entry_id = entry_id,
+#                                     user_id = user_id,
+#                                     avg_steps_walked = avg_steps_walked,
+#                                     avg_mins_slept = avg_mins_slept,
+#                                     avg_mins_exercise = avg_mins_exercise,
+#                                     avg_resting_hr = avg_resting_hr, 
+#                                     start_date = start_date,
+#                                     end_date = end_date)
+#         db.session.add(monthlymetric)
 
-    db.session.commit()
+#     db.session.commit()
 
 def load_phq():
     """Load PHQ9 info from u.phq into database."""
@@ -177,18 +177,6 @@ def load_sleep():
         
     db.session.commit()
 
-# def set_val_user_id():
-#     """Set value for the next user_id after seeding database"""
-
-#     # Get the Max user_id in the database
-#     result = db.session.query(func.max(User.user_id)).one()
-#     max_id = int(result[0])
-
-#     # Set the value for the next user_id to be max_id + 1
-#     query = "SELECT setval('users_user_id_seq', :new_id)"
-#     db.session.execute(query, {'new_id': max_id + 1})
-#     db.session.commit()
-
 
 if __name__ == "__main__":
     connect_to_db(app)
@@ -199,8 +187,6 @@ if __name__ == "__main__":
     # Import different types of data
     load_users()
     load_dailymetrics()
-    load_weeklymetrics()
-    load_monthlymetrics()
     load_phq()
     load_gad()
     load_sleep()
