@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<h1>Registration Form:</h1>
+
+    <form action = '/register' class="form-register" method="POST">
+
+        <h2 class="form-register-heading">Create Your FitKit Account</h2>
+
+        <div class="form-group">
+            <label for="email-field" class="sr-only">Email Address</label>
+            <input type="email"
+                   name="email"
+                   class="form-control input-lg"
+                   placeholder="Email Address"
+                   required
+                   autofocus>
+        </div>
+
+        <div class="form-group">
+            <label for="password-field" class="sr-only">Password</label>
+            <input type="password"
+                   name="password"
+                   class="form-control input-lg"
+                   placeholder="Password"
+                   required>
+        </div>
+
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Create your account
+        </button>
+
+    </form>
+
+
+{% endblock %}

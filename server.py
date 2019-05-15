@@ -5,10 +5,10 @@ import os
 from pprint import pformat
 
 import requests
-from flask import Flask, render_template, request, flash, redirect
+from flask import Flask, render_template, request, flash, redirect, session
 from flask_debugtoolbar import DebugToolbarExtension
 
-from model import connect_to_db, db
+from model import connect_to_db, db, User, DailyMetric, WeeklyMetric, MonthlyMetric, PHQ, GAD, Sleep
 
 
 app = Flask(__name__)
@@ -29,15 +29,89 @@ app.jinja_env.undefined = StrictUndefined
 @app.route('/')
 def index():
     """Homepage."""
-    return render_template('index.html')
+    return render_template('homepage.html')
+
+@app.route('/register', methods = ['GET'])
+def register_form():
+    """Register new users"""
+    return render_template('register.html')
+
+@app.route('/register', methods = ['POST'])
+def process_registration():
+    """Process new user registration"""
+    email = request.form.get('password')
+    password = request.form.get('email')
+
+    new_user = User(email = email, password = password)
+    
+    db.session.add(new_user)
+    db.session.commit()
+    session['user_id'] = new_user.user_id
+
+    flash('Welcome!')
+
+    return render_template('/hipaa.html')
+
+@app.route('/hipaa', methods = ['POST'])
+def hipaa_form():
+    if request.form.getlist('acknowledged-hipaa'):
+        user = User.query.filter(User.user_id == session['user_id']).first()
+        user.has_signed_hipaa = True
+        db.session.commit()
+        return redirect('/user_profile')
+    else:
+        flash('You must acknowledge HIPAA Privacy Practices.')
+        return render_template('/hipaa.html')
+
+
+
+@app.route('/login', methods = ['GET'])
+def login_form():
+    """Sends user to login form to fill out"""
+    return render_template('login.html')
 
 @app.route('/login', methods = ['POST'])
 def login():
-    email = request.forms.get('email')
-    password = request.forms.get('password')
-    
-    return render_template('login.html')
+    """Sends user to user profile once correct email and password combo entered"""
+    email = request.form.get('email')
+    password = request.form.get('password')
 
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        flash("Incorrect email. Please try again.")
+        return redirect("/login")
+
+    if user.password != password:
+        flash("Incorrect password. Please try again.")
+        return redirect("/login")
+
+    session["user_id"] = user.user_id
+
+    flash("Logged in")
+    return redirect('/user_profile')
+
+@app.route('/logout', methods = ['POST'])
+def logout():
+    """Logs user out."""
+
+    if (session.get('user_id', False)) != False:
+        del session['user_id']
+        flash("You have successfully logged out.")
+        return redirect ('/')
+    else:
+        flash('You have already logged out.')
+
+@app.route('/user_profile')
+def user_profile():
+    user_id = session.get('user_id')
+    user = User.query.options(db.joinedload('dailymetrics')).get(user_id)
+    return render_template("user_profile.html", user=user)
+
+@app.route('/getfit')
+def show_fitbit_form():
+    return render_template('fitbitdata.html')
 
 @app.route('/fitbitdata', methods = ['GET'])
 def export_fitbitdata():
@@ -53,8 +127,10 @@ def export_fitbitdata():
         headers = {'Authorization': 'Bearer ' + TOKEN}
         response = requests.get(FITBIT_URL, params = payload, headers = headers)
         data = response.json()
+        data = pprint(data)
 
         if response.ok:
+            print(data)
             # data = data
             pass #figure out what to parse in data/response from FitBit API
 

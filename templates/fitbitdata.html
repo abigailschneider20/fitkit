@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<h2 class="form-signin-heading">Export your FitBit data</h2>
+    <form action="/fitbitdata" method="GET">
+       <!-- insert calendar plugin function to get date1 and date2, unless only specify today -->
+       <input type = "text" name = "date1"> Start Date (YYYY-MM-DD) <br>
+       <input type = "text" name = "date2"> End Date (YYYY-MM-DD) <br>
+
+       Type of FitBit data <br>
+        <input type = "radio" name = "type" value = "activities/heart"> Heart Rate <br>
+        <input type = "radio" name = "type" value = "activities/"> Steps + Activity <br>
+        <input type = "radio" name = "type" value = "sleep/"> Sleep <br>
+        
+        <button type="submit">Submit
+        </button>
+
+
+    </form>
+
+{% endblock %}

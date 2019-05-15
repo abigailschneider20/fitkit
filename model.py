@@ -20,7 +20,7 @@ class User(db.Model):
     user_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     email = db.Column(db.String(80), nullable=True)
     password = db.Column(db.String(40), nullable=True)
-    has_signed_hipaa = db.Column(db.Boolean, default = True)
+    has_signed_hipaa = db.Column(db.Boolean, default = False)
 
     def __repr__(self):
         return f"<User user_id={self.user_id} email={self.email}>"

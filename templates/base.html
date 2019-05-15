@@ -2,6 +2,7 @@
 <head>
     <link rel="stylesheet"
           href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.css"/>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 
 </head>
 
@@ -17,9 +18,14 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
                 <li>
-                    <a href="/fitbitdata">
+                    <a href="/login">
                         Login
                     </a>
+                </li>
+                <li>
+                  <a href = "/register">
+                    New User? Register Here
+                  </a>
                 </li>
             </ul>
         </div>
@@ -38,7 +44,7 @@
 
   <!-- This is where the main content goes. -->
   {% block body %}
-      BODY OF PAGE GOES HERE VIA INHERITANCE
+      
   {% endblock %}
 
 </div>

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block body %}
+<br>
+<div>
+  <h1> FitKit Data for: {{ user.email }} </h1>
+
+
+  {% if user.dailymetrics %}
+
+    <h2>Daily Metrics</h2>
+    <ul>
+    {% for metric in user.dailymetrics %}
+        <h3>Data for {{metric.date}}: </h3> <br>
+        <li>Steps Walked: {{ metric.steps_walked }}</li>
+        <li>Hours Slept: {{metric.mins_slept//60}} hours and {{(metric.mins_slept%60)}} minutes </li>
+        <li>Active Minutes: {{metric.mins_exercise}} </li>
+        <li>Sedentary Minutes: {{metric.mins_sedentary}} </li>
+        <li>Resting Heart Rate: {{metric.resting_hr}} </li>
+
+    {% endfor %}
+    </ul>
+  {% endif %}
+
+    {% if user.weeklymetrics %}
+
+    <h2>Weekly Metrics</h2>
+    <ul>
+    {% for metric in user.weeklymetrics %}
+        <h3>Data for {{metric.start_date}} - {{metric.end_date}}: </h3> <br>
+        <li>Average Steps Walked: {{ metric.avg_steps_walked }}</li>
+        <li>Average Hours Slept: {{metric.avg_mins_slept//60}} hours and {{(metric.avg_mins_slept%60)}} minutes </li>
+        <li>Average Active Minutes: {{metric.avg_mins_exercise}} </li>
+        <li>Average Resting Heart Rate: {{metric.avg_resting_hr}} </li>
+
+    {% endfor %}
+    </ul>
+  {% endif %}
+
+    {% if user.monthlymetrics %}
+
+    <h2>Monthly Metrics</h2>
+    <ul>
+    {% for metric in user.monthlymetrics %}
+        <h3>Data for {{metric.start_date}} - {{metric.end_date}}: </h3> <br>
+        <li>Average Steps Walked: {{ metric.avg_steps_walked }}</li>
+        <li>Average Hours Slept: {{metric.avg_mins_slept//60}} hours and {{(metric.avg_mins_slept%60)}} minutes </li>
+        <li>Average Active Minutes: {{metric.avg_mins_exercise}} </li>
+        <li>Average Resting Heart Rate: {{metric.avg_resting_hr}} </li>
+
+    {% endfor %}
+    </ul>
+  {% endif %}
+
+    {% if user.phq %}
+
+    <h2>PHQ-9 Scores</h2>
+    <ul>
+    {% for test in user.phq %}
+        <h3>Data for PHQ-9 taken on {{test.date}}: </h3> <br>
+        <li>Total Score: {{test.score}}</li>
+        <li>Indicated Depression Severity: {{test.dep_severity}} </li>
+
+    {% endfor %}
+    </ul>
+  {% endif %}
+
+    {% if user.gad %}
+
+    <h2>GAD-7 Scores</h2>
+    <ul>
+    {% for test in user.gad %}
+        <h3>Data for GAD-7 taken on {{test.date}}: </h3> <br>
+        <li>Total Score: {{test.score}}</li>
+        <li>Indicated Anxiety Severity: {{test.anx_severity}} </li>
+
+    {% endfor %}
+    </ul>
+  {% endif %} 
+
+
+    {% if user.sleep %}
+
+    <h2>Sleep Questionnaire Scores</h2>
+    <ul>
+    {% for test in user.sleep %}
+        <h3>Data for Sleep Questionnaire taken on {{test.date}}: </h3> <br>
+        <li>Total Score: {{test.score}}</li>
+        <li>Indicated Insomnia Severity: {{test.insomnia_severity}} </li>
+
+    {% endfor %}
+    </ul>
+  {% endif %} 
+</div>
+
+{% endblock %}

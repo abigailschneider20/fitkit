@@ -1,0 +1,26 @@
+    
+{% extends 'base.html' %}
+{% block body %}
+
+  <h2>HIPAA Compliance Patient Consent Form</h2>
+
+<div>
+  <p>
+   Our Notice of Privacy Practices provides information about how we may use or disclose protected health information. The notice contains a patient’s rights section describing your rights under the law. You ascertain that by your signature that you have reviewed our notice before signing this consent.The terms of the notice may change, if so, you will be notified at your next visit to update your signature/date.You have the right to restrict how your protected health information is used and disclosed for treatment, payment or healthcare operations. We are not required to agree with this restriction, but if we do, we shall honor this agreement. The HIPAA (Health Insurance Portability and Accountability Act of 1996) law allows for the use of the information for treatment, payment, or healthcare operations. </p> <br>
+   <p> By signing this form, you consent to our use and disclosure of your protected healthcare information and potentially anonymous usage in a publication. You have the right to revoke this consent in writing, signed by you. However, such a revocation will not be retroactive. </p>
+
+   <p> By signing this form, I understand that: </p>
+        <li> Protected health information may be disclosed or used for treatment, payment, or healthcare operations. </li>
+        <li> The practice reserves the right to change the privacy policy as allowed by law. </li>
+        <li> The practice has the right to restrict the use of the information but the practice does not have to agree to those restrictions. </li>
+        <li> The patient has the right to revoke this consent in writing at any time and all full disclosures will then cease. </li>
+   
+</div>
+<form action = '/hipaa' method = "POST"> <br>
+    <input type = "checkbox" name = "acknowledged-hipaa" value = 'checked'> Please check this box once you have read and agree to the Notice of Privacy Practices. 
+    <button class="btn btn-med btn-primary btn-block" type="submit">Submit
+    </button>
+</form>
+
+   
+   {% endblock %} 
