@@ -113,29 +113,47 @@ def show_fitbit_form():
 @app.route('/fitbitdata', methods = ['GET'])
 def export_fitbitdata():
     date1 = request.args.get('date1') 
-    date2 = request.args.get('date2', None) #Will get date for fitbit data request
+    date2 = request.args.get('date2') #Will get date for fitbit data request
     type_of_data = request.args.get('type')
+
     print(type_of_data) #Will get whether user wants hr, sleep, or activity data
     
     if session['user_id'] == 1:
-        if date1 and type_of_data:
+        if date1 and date2 and type_of_data:
+            headers = {'Authorization': 'Bearer ' + FITBIT_TOKEN}
             if type_of_data == 'heart':
-                url = f"https://api.fitbit.com/1/user/-/activities/date/{date1}/{date2}"
-                # url = f"https://api.fitbit.com/1/user/-/activities/heart/date/{date1}/{date2}.json" #f string
+                url = f"https://api.fitbit.com/1/user/-/activities/heart/date/{date1}/{date2}.json"
+                response = requests.get(url, headers = headers)
             elif type_of_data == 'activities':
-                url = f"https://api.fitbit.com/1/user/-/activities/date/{date1}/{date2}.json"
+                url1 = f"https://api.fitbit.com/1/user/-/activities/steps/date/{date1}/{date2}.json"
+                url2= f"https://api.fitbit.com/1/user/-/activities/minutesSedentary/date/{date1}/{date2}.json"
+                url3= f"https://api.fitbit.com/1/user/-/activities/minutesFairlyActive/date/{date1}/{date2}.json"
+                url4= f"https://api.fitbit.com/1/user/-/activities/minutesLightlyActive/date/{date1}/{date2}.json"
+                url5= f"https://api.fitbit.com/1/user/-/activities/minutesVeryActive/date/{date1}/{date2}.json"
+                response = requests.get(url1, headers = headers)
+                response = response.append(requests.get(url2, headers = headers))
+                response = response.append(requests.get(url3, headers = headers))
+                response = response.append(requests.get(url4, headers = headers))
+                response = response.append(requests.get(url5, headers = headers))
             else:
                 url = f"https://api.fitbit.com/1.2/user/-/sleep/date/{date1}/{date2}.json"
+                response = requests.get(url, headers = headers)
 
-            headers = {'Authorization': 'Bearer ' + FITBIT_TOKEN}
-            response = requests.get(url, headers = headers)
+            print(url)
+            print(response)
             data = response.json()
+            print(data)
             data = pformat(data)
+            print('WOOOOOOOOOOOOOO')
+            return redirect('/')
+    else:
+        print('ERROR')
 
-            if response.ok:
-                print(data)
+            # if response.ok:
+            #     print(data)
+            #     
                 # data = data
-                pass #figure out what to parse in data/response from FitBit API
+                 #figure out what to parse in data/response from FitBit API
                 #weather sunlight correlation to mental health
                 #endpoint that returns dynamic image of chart to front end
                 #function to retrieve daily data and range data, initial load, can be same function with optional parameter
@@ -144,14 +162,14 @@ def export_fitbitdata():
                 #start by creating python script to continuously grab the data, transform it, load it to db instaed of reloading browser
                 #implement print messages; import requests, import psql/SQLA, and tables; script lives in same directory as models
                 #Use sql to get aggregate data SQLA
-            else:
-                flash('Sorry, we could not access your FitBit data.')
+            # else:
+            #     flash('Sorry, we could not access your FitBit data.')
 
-                return render_template('fitbitdata.html', data = pformat(data), results = results)
+            #     return render_template('fitbitdata.html', data = pformat(data), results = results)
 
-        else:
-            flash('Please provide all of the required information')
-            return redirect('/fitbitdata')
+        # else:
+        #     flash('Please provide all of the required information')
+        #     return redirect('/fitbitdata')
 
 #     else:
 #         #use Mockaroo to generate random entries depending on condition assigned
