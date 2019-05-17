@@ -25,25 +25,40 @@ class User(db.Model):
     def __repr__(self):
         return f"<User user_id={self.user_id} email={self.email}>"
 
-class DailyMetric(db.Model):
-    """Daily metrics of users of app"""
+class MetricType(db.Model):
+    """ Middle table representing types of metrics exported from FitBit"""
+    
+    __tablename__ = "metrictypes"
 
-    __tablename__ = "dailymetrics"
+    type_id = db.Column(db.Integer, autoincrement = True, primary_key = True)
+    activity_name = db.Column(db.String(30), nullable = False)
+
+    def __repr__(self):
+        return f"<Activity Type type_id={self.type_id} activity_name={self.activity_name}>"
+
+
+class DailyEntry(db.Model):
+    """Daily metric entries of users of app"""
+
+    __tablename__ = "dailyentries"
 
     entry_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
-    steps_walked = db.Column(db.Integer, nullable = True)
-    mins_slept = db.Column(db.Integer, nullable = True)
-    mins_exercise = db.Column(db.Integer, nullable = True)
-    mins_sedentary = db.Column(db.Integer, nullable = True)
-    resting_hr = db.Column(db.Integer, nullable = True)
-    date = db.Column(db.DateTime)
+    type_id = db.Column(db.Integer, db.ForeignKey('metrictypes.type_id'))
+    val = db.Column(db.Integer)
+    date = db.Column(db.Date)
+
 
     user = db.relationship('User', 
                             backref = db.backref('dailymetrics', 
                                 order_by = user_id))
+
+    activity = db.relationship('MetricType',
+                                backref = db.backref('dailyentries', 
+                                    order_by = type_id))
+
     def __repr__(self):
-        return f"<Daily Metric user_id={self.user_id} entry_id={self.entry_id}>"
+        return f"<Daily Entry user_id={self.user_id} entry_id={self.entry_id} type_id ={self.type_id}>"
 
 # class WeeklyMetric(db.Model):
 #     """Weekly metrics of users of app"""
@@ -95,7 +110,7 @@ class PHQ(db.Model):
 
     phq_id = db.Column(db.Integer, autoincrement = True, primary_key = True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
-    date = db.Column(db.DateTime)
+    date = db.Column(db.Date)
     q1_answer = db.Column(db.Integer, nullable = True)
     q2_answer = db.Column(db.Integer, nullable = True)
     q3_answer = db.Column(db.Integer, nullable = True)
@@ -123,7 +138,7 @@ class GAD(db.Model):
 
     gad_id = db.Column(db.Integer, autoincrement = True, primary_key = True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
-    date = db.Column(db.DateTime)
+    date = db.Column(db.Date)
     q1_answer = db.Column(db.Integer, nullable = True)
     q2_answer = db.Column(db.Integer, nullable = True)
     q3_answer = db.Column(db.Integer, nullable = True)
@@ -147,7 +162,7 @@ class Sleep(db.Model):
 
     sleep_id = db.Column(db.Integer, autoincrement = True, primary_key = True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
-    date = db.Column(db.DateTime)
+    date = db.Column(db.Date)
     q1_answer = db.Column(db.Integer, nullable = True) 
     q2_answer = db.Column(db.Integer, nullable= True)
     q3_answer = db.Column(db.Integer, nullable = True)

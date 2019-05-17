@@ -9,7 +9,7 @@ import requests
 from flask import Flask, render_template, request, flash, redirect, session, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 
-from model import connect_to_db, db, User, DailyMetric, PHQ, GAD, Sleep
+from model import connect_to_db, db, User, MetricType, DailyEntry, PHQ, GAD, Sleep
 
 
 app = Flask(__name__)
@@ -40,7 +40,6 @@ def process_registration():
     password = request.form.get('password')
 
     new_user = User(email = email, password = password)
-    print (new_user)
     db.session.add(new_user)
     db.session.commit()
     session['user_id'] = new_user.user_id
@@ -87,7 +86,7 @@ def login():
     session["user_id"] = user.user_id
 
     flash("Logged in")
-    return redirect('/user_profile')
+    return render_template('user_profile.html', user = user)
 
 @app.route('/logout', methods = ['POST'])
 def logout():
@@ -137,8 +136,9 @@ def export_fitbitdata():
                 rendered_data = data[type_of_data]
             else:
                 rendered_data = data[type_of_activity]
-            for i in rendered_data: #make two separate tables: activity type, foreign key = user_id, other table has user entries
-            #ex. id for heart rate is 1, in other table user_id is 1 and heart rate 1, value and date
+
+        # START EDITING HERE!
+            for i in rendered_data: 
                 if type_of_data == 'sleep':
                     new_entry = DailyMetric.query.filter(DailyMetric.user_id == session['user_id'], DailyMetric.date == i['dateOfSleep']).first()
                     if new_entry:

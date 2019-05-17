@@ -11,17 +11,12 @@
     <h2>Daily Metrics</h2>
     <ul>
     {% for metric in user.dailymetrics %}
-        <h3>Data for {{metric.date}}: </h3> <br>
-        <li>Steps Walked: {{ metric.steps_walked }}</li>
-        <li>Hours Slept: {{metric.mins_slept//60}} hours and {{(metric.mins_slept%60)}} minutes </li>
-        <li>Active Minutes: {{metric.mins_exercise}} </li>
-        <li>Sedentary Minutes: {{metric.mins_sedentary}} </li>
-        <li>Resting Heart Rate: {{metric.resting_hr}} </li>
-
+        <h4> Data for {{metric.date}} </h4> <br>
+        <li> {{metric.activity.activity_name}} : {{metric.val}}</li> <br>
+     
     {% endfor %}
-    </ul>
-  {% endif %}
-
+  </ul>
+   {% endif %}
     {% if user.phq %}
 
     <h2>PHQ-9 Scores</h2>

@@ -1,6 +1,6 @@
 from sqlalchemy import func
 
-from model import connect_to_db, db, User, DailyMetric, GAD, PHQ, Sleep
+from model import connect_to_db, db, User, MetricType, DailyEntry, GAD, PHQ, Sleep
 from server import app
 
 
@@ -20,35 +20,25 @@ def load_users():
                     email = email,
                     password = password)
 
-        # We need to add to the session or it won't ever be stored
         db.session.add(user)
 
-    # Once we're done, we should commit our work
     db.session.commit()
 
+def load_metrictypes():
+    """Load metric types from u.metrictypes into database."""
+    MetricType.query.delete()
 
-def load_dailymetrics():
-    """Load daily metrics from u.dailymetrics into database."""
-
-    DailyMetric.query.delete()
-
-    for row in open("seed_data/u.dailymetrics"):
+    for row in open("seed_data/u.metrictypes"):
         row = row.rstrip()
-        (entry_id, user_id, steps_walked, mins_slept, mins_exercise, 
-        mins_sedentary, resting_hr, date) = row.split("|")
+        type_id, activity_name = row.split("|")
 
-        dailymetric = DailyMetric(entry_id = entry_id,
-                                    user_id = user_id, 
-                                    steps_walked = steps_walked,
-                                    mins_slept = mins_slept,
-                                    mins_exercise = mins_exercise,
-                                    mins_sedentary = mins_sedentary,
-                                    resting_hr = resting_hr, 
-                                    date = date)
+        metrictype = MetricType(type_id = type_id, activity_name = activity_name)
 
-        db.session.add(dailymetric)
+        db.session.add(metrictype)
 
     db.session.commit()
+
+
 
 
 
@@ -177,6 +167,24 @@ def load_sleep():
         
     db.session.commit()
 
+def load_dailyentries():
+    """Load daily metrics from u.dailymetrics into database."""
+
+    DailyEntry.query.delete()
+
+    for row in open("seed_data/u.dailymetrics"):
+        entry, user, type_id, val, date = row.split("|")
+
+        daily = DailyEntry(entry_id = entry,
+                                user_id = user,
+                                type_id = type_id,
+                                val = val,
+                                date = date)
+
+        db.session.add(daily)
+
+    db.session.commit()
+
 
 if __name__ == "__main__":
     connect_to_db(app)
@@ -186,7 +194,8 @@ if __name__ == "__main__":
 
     # Import different types of data
     load_users()
-    load_dailymetrics()
+    load_metrictypes()
+    load_dailyentries()
     load_phq()
     load_gad()
     load_sleep()
