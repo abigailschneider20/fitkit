@@ -3,10 +3,10 @@
 from jinja2 import StrictUndefined
 import os
 from pprint import pformat
-
+import json
 
 import requests
-from flask import Flask, render_template, request, flash, redirect, session
+from flask import Flask, render_template, request, flash, redirect, session, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 
 from model import connect_to_db, db, User, DailyMetric, PHQ, GAD, Sleep
@@ -115,45 +115,73 @@ def export_fitbitdata():
     date1 = request.args.get('date1') 
     date2 = request.args.get('date2') #Will get date for fitbit data request
     type_of_data = request.args.get('type')
+    type_of_activity = request.args.get('activitytype')
+    #Will get whether user wants hr, sleep, or activity data
+    activity_type_dict = {"activities-heart": f"https://api.fitbit.com/1/user/-/activities/heart/date/{date1}/{date2}.json", 
+                    "activities-steps": f"https://api.fitbit.com/1/user/-/activities/steps/date/{date1}/{date2}.json",
+                    "activities-minutesSedentary": f"https://api.fitbit.com/1/user/-/activities/minutesSedentary/date/{date1}/{date2}.json",
+                    "activities-minutesFairlyActive": f"https://api.fitbit.com/1/user/-/activities/minutesFairlyActive/date/{date1}/{date2}.json",
+                    "activities-minutesLightlyActive": f"https://api.fitbit.com/1/user/-/activities/minutesLightlyActive/date/{date1}/{date2}.json",
+                    "activities-minutesVeryActive": f"https://api.fitbit.com/1/user/-/activities/minutesVeryActive/date/{date1}/{date2}.json"}
 
-    print(type_of_data) #Will get whether user wants hr, sleep, or activity data
-    
-    if session['user_id'] == 1:
-        if date1 and date2 and type_of_data:
+    if date1 and date2 and type_of_data:
+        if session['user_id'] == 1:
             headers = {'Authorization': 'Bearer ' + FITBIT_TOKEN}
-            if type_of_data == 'heart':
-                url = f"https://api.fitbit.com/1/user/-/activities/heart/date/{date1}/{date2}.json"
-                response = requests.get(url, headers = headers)
-            elif type_of_data == 'activities':
-                url1 = f"https://api.fitbit.com/1/user/-/activities/steps/date/{date1}/{date2}.json"
-                url2= f"https://api.fitbit.com/1/user/-/activities/minutesSedentary/date/{date1}/{date2}.json"
-                url3= f"https://api.fitbit.com/1/user/-/activities/minutesFairlyActive/date/{date1}/{date2}.json"
-                url4= f"https://api.fitbit.com/1/user/-/activities/minutesLightlyActive/date/{date1}/{date2}.json"
-                url5= f"https://api.fitbit.com/1/user/-/activities/minutesVeryActive/date/{date1}/{date2}.json"
-                response = requests.get(url1, headers = headers)
-                response = response.append(requests.get(url2, headers = headers))
-                response = response.append(requests.get(url3, headers = headers))
-                response = response.append(requests.get(url4, headers = headers))
-                response = response.append(requests.get(url5, headers = headers))
+            if type_of_data != 'steps':
+                response = requests.get(activity_type_dict[type_of_data], headers=headers)
             else:
-                url = f"https://api.fitbit.com/1.2/user/-/sleep/date/{date1}/{date2}.json"
-                response = requests.get(url, headers = headers)
+                response = requests.get(activity_type_dict[type_of_activity], headers=headers)
 
-            print(url)
-            print(response)
-            data = response.json()
-            print(data)
-            data = pformat(data)
-            print('WOOOOOOOOOOOOOO')
-            return redirect('/')
-    else:
-        print('ERROR')
+            data = (response).json()
+            if type_of_data != 'steps':
+                rendered_data = data[type_of_data]
+            else:
+                rendered_data = data[type_of_activity]
+            for i in rendered_data: #make two separate tables: activity type, foreign key = user_id, other table has user entries
+            #ex. id for heart rate is 1, in other table user_id is 1 and heart rate 1, value and date
+                if type_of_data == 'sleep':
+                    new_entry = DailyMetric.query.filter(DailyMetric.user_id == session['user_id'], DailyMetric.date == i['dateOfSleep']).first()
+                    if new_entry:
+                        new_entry.mins_slept = (i['minutesAsleep'])
+                    else:
+                        new_entry = DailyMetric(user_id = session['user_id'], mins_slept = (i['minutesAsleep']), date = i['dateOfSleep'])
+                elif type_of_data == 'activities-heart':
+                    new_entry = DailyMetric.query.filter(DailyMetric.user_id == session['user_id'], DailyMetric.date == i['dateTime']).first()
+                    if new_entry:
+                        new_entry.resting_hr = (i['value']['restingHeartRate'])
+                    else:
+                        new_entry = DailyMetric(user_id = session['user_id'], date = i['dateTime'], resting_hr = (i['value']['restingHeartRate']))
+                else:
+                    new_entry = DailyMetric.query.filter(DailyMetric.user_id == session['user_id'], DailyMetric.date == i['dateTime']).first()
+                    if type_of_activity == 'activities-steps':
+                        if new_entry:
+                            new_entry.steps_walked = (i['value'])
+                        else:
+                            new_entry = DailyMetric(user_id = session['user_id'], date = i['dateTime'], steps_walked = i['value'])
+                    elif type_of_activity ==  'activities-minutesSedentary':
+                        if new_entry:
+                            new_entry.mins_sedentary = (i['value'])
+                        else:
+                            new_entry = DailyMetric(user_id = session['user_id'], date = i['dateTime'], mins_sedentary = i['value'])
+                    # elif type_of_activity == 'activities-minutesFairlyActive':
+                    #     if new_entry:
+                    #         new_entry.mins_exercise += (int(i['value']))
+                    #     else:
+                    #         new_entry = DailyMetric(user_id = session['user_id'], date = i['dateTime'], mins_exercise = i['value'] )
+                    # elif type_of_activity == 'activities-minutesLightlyActive':
+                    #     new_entry = DailyMetric(user_id = session['user_id'], date = i['dateTime'], mins_lightly_active = i['value'] )
+                    # else:
+                    #     new_entry = DailyMetric(user_id = session['user_id'], date = i['dateTime'], mins_very_active = i['value'] )
+                db.session.add(new_entry)
+            db.session.commit()
 
-            # if response.ok:
-            #     print(data)
-            #     
-                # data = data
-                 #figure out what to parse in data/response from FitBit API
+            return render_template('showfitbitdata.html', data = rendered_data, type_of_data = type_of_data, type_of_activity = type_of_activity)
+
+        else:
+            print('ERROR')
+            flash('ERROR FOR RN')
+            return redirect ('/getfit')
+            
                 #weather sunlight correlation to mental health
                 #endpoint that returns dynamic image of chart to front end
                 #function to retrieve daily data and range data, initial load, can be same function with optional parameter
@@ -167,13 +195,13 @@ def export_fitbitdata():
 
             #     return render_template('fitbitdata.html', data = pformat(data), results = results)
 
-        # else:
-        #     flash('Please provide all of the required information')
-        #     return redirect('/fitbitdata')
+    else:
+        flash('Please provide all of the required information')
+        return redirect('/getfit')
 
-#     else:
-#         #use Mockaroo to generate random entries depending on condition assigned
-#         #Anxiety = 0.18, Depression = 0.08, Insomnia = 0.25
+
+def create_seed_file(rendered_data):
+    print(rendered_data)
 
 @app.route('/newtest', methods = ['GET'])
 def navigate_to_tests():

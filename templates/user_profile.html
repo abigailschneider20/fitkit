@@ -4,8 +4,8 @@
 <div>
   <h1> FitKit Data for: {{ user.email }} </h1>
 
-  <h3> <form action = '/getfit' method = "GET"> <a href = "/getfit"> Access your FitBit data</a></form> </h3>
-  <span><h3> <form action = '/newtest' method = "GET"> <a href = "/newtest"> Take a new mental health test</a></form> </h3>
+  <span><h3> <form action = '/getfit' method = "GET"> <a href = "/getfit"> Access your FitBit data</a></form> </h3>
+  <h3> <form action = '/newtest' method = "GET"> <a href = "/newtest"> Take a new mental health test</a></form> </h3> </span>
   {% if user.dailymetrics %}
 
     <h2>Daily Metrics</h2>
