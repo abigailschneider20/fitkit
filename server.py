@@ -116,12 +116,16 @@ def export_fitbitdata():
     type_of_data = request.args.get('type')
     type_of_activity = request.args.get('activitytype')
     #Will get whether user wants hr, sleep, or activity data
-    activity_type_dict = {"activities-heart": f"https://api.fitbit.com/1/user/-/activities/heart/date/{date1}/{date2}.json", 
-                    "activities-steps": f"https://api.fitbit.com/1/user/-/activities/steps/date/{date1}/{date2}.json",
+    activity_type_dict = {"sleep": f"https://api.fitbit.com/1.2/user/-/sleep/date/{date1}/{date2}.json",
+                    "activities-heart": f"https://api.fitbit.com/1/user/-/activities/heart/date/{date1}/{date2}.json", 
+                    "steps": {"activities-steps": f"https://api.fitbit.com/1/user/-/activities/steps/date/{date1}/{date2}.json",
                     "activities-minutesSedentary": f"https://api.fitbit.com/1/user/-/activities/minutesSedentary/date/{date1}/{date2}.json",
                     "activities-minutesFairlyActive": f"https://api.fitbit.com/1/user/-/activities/minutesFairlyActive/date/{date1}/{date2}.json",
                     "activities-minutesLightlyActive": f"https://api.fitbit.com/1/user/-/activities/minutesLightlyActive/date/{date1}/{date2}.json",
-                    "activities-minutesVeryActive": f"https://api.fitbit.com/1/user/-/activities/minutesVeryActive/date/{date1}/{date2}.json"}
+                    "activities-minutesVeryActive": f"https://api.fitbit.com/1/user/-/activities/minutesVeryActive/date/{date1}/{date2}.json"}}
+
+    activity_typeid_dict = {'activities-steps': 1, 'sleep': 2, 'activities-minutesFairlyActive': 3, 'activities-minutesLightlyActive': 3, 
+                            'activities-minutesVeryActive': 3,'activities-minutesSedentary': 4, 'activities-heart': 5 }
 
     if date1 and date2 and type_of_data:
         if session['user_id'] == 1:
@@ -129,54 +133,62 @@ def export_fitbitdata():
             if type_of_data != 'steps':
                 response = requests.get(activity_type_dict[type_of_data], headers=headers)
             else:
-                response = requests.get(activity_type_dict[type_of_activity], headers=headers)
+                response = requests.get(activity_type_dict["steps"][type_of_activity], headers=headers)
+
 
             data = (response).json()
+
+            show_fitbit_data_lst = []
+
             if type_of_data != 'steps':
                 rendered_data = data[type_of_data]
             else:
                 rendered_data = data[type_of_activity]
+        
 
-        # START EDITING HERE!
-            for i in rendered_data: 
+            for i in rendered_data:
                 if type_of_data == 'sleep':
-                    new_entry = DailyMetric.query.filter(DailyMetric.user_id == session['user_id'], DailyMetric.date == i['dateOfSleep']).first()
-                    if new_entry:
-                        new_entry.mins_slept = (i['minutesAsleep'])
-                    else:
-                        new_entry = DailyMetric(user_id = session['user_id'], mins_slept = (i['minutesAsleep']), date = i['dateOfSleep'])
+                    existing_entry = DailyEntry.query.filter(DailyEntry.date == i['dateOfSleep'], DailyEntry.type_id == (activity_typeid_dict[type_of_data])).first()
+                    if existing_entry:
+                        existing_entry = existing_entry
+                    else: 
+                        new_entry = DailyEntry(user_id = session['user_id'], type_id = activity_typeid_dict[type_of_data], val = i['minutesAsleep'], date = i['dateOfSleep'])  
+                        db.session.add(new_entry)
                 elif type_of_data == 'activities-heart':
-                    new_entry = DailyMetric.query.filter(DailyMetric.user_id == session['user_id'], DailyMetric.date == i['dateTime']).first()
-                    if new_entry:
-                        new_entry.resting_hr = (i['value']['restingHeartRate'])
+                    existing_entry = DailyEntry.query.filter(DailyEntry.date == i['dateTime'], DailyEntry.type_id == (activity_typeid_dict[type_of_data])).first()
+                    if existing_entry:
+                        existing_entry = existing_entry
                     else:
-                        new_entry = DailyMetric(user_id = session['user_id'], date = i['dateTime'], resting_hr = (i['value']['restingHeartRate']))
+                        new_entry = DailyEntry(user_id = session['user_id'], type_id = activity_typeid_dict[type_of_data], val = i['value']['restingHeartRate'], date = i['dateTime'])
+                        db.session.add(new_entry)
                 else:
-                    new_entry = DailyMetric.query.filter(DailyMetric.user_id == session['user_id'], DailyMetric.date == i['dateTime']).first()
-                    if type_of_activity == 'activities-steps':
-                        if new_entry:
-                            new_entry.steps_walked = (i['value'])
+                    if type_of_activity == 'activities-minutesSedentary':
+                        existing_entry = DailyEntry.query.filter(DailyEntry.date == i['dateTime'], DailyEntry.type_id == (activity_typeid_dict[type_of_data])).first()
+                        if existing_entry:
+                            existing_entry = existing_entry
                         else:
-                            new_entry = DailyMetric(user_id = session['user_id'], date = i['dateTime'], steps_walked = i['value'])
-                    elif type_of_activity ==  'activities-minutesSedentary':
+                            new_entry = DailyEntry(user_id = session['user_id'], type_id = activity_typeid_dict[type_of_activity], val = i['value'], date = i['dateTime'])
+                            db.session.add(new_entry)
+                    else:
+                        new_entry = DailyEntry.query.filter(DailyEntry.date == (i['dateTime']), DailyEntry.type_id == (activity_typeid_dict[type_of_activity])).first()
                         if new_entry:
-                            new_entry.mins_sedentary = (i['value'])
+                            new_entry.val += (int(i['value']))
                         else:
-                            new_entry = DailyMetric(user_id = session['user_id'], date = i['dateTime'], mins_sedentary = i['value'])
-                    # elif type_of_activity == 'activities-minutesFairlyActive':
-                    #     if new_entry:
-                    #         new_entry.mins_exercise += (int(i['value']))
-                    #     else:
-                    #         new_entry = DailyMetric(user_id = session['user_id'], date = i['dateTime'], mins_exercise = i['value'] )
-                    # elif type_of_activity == 'activities-minutesLightlyActive':
-                    #     new_entry = DailyMetric(user_id = session['user_id'], date = i['dateTime'], mins_lightly_active = i['value'] )
-                    # else:
-                    #     new_entry = DailyMetric(user_id = session['user_id'], date = i['dateTime'], mins_very_active = i['value'] )
-                db.session.add(new_entry)
+                            new_entry = DailyEntry(user_id = session['user_id'], type_id = activity_typeid_dict[type_of_activity], val = i['value'], date = i['dateTime'])
+
+                        db.session.add(new_entry)
+
+                        show_fitbit_data_lst.append(new_entry)
+
+                if existing_entry:
+                    show_fitbit_data_lst.append(existing_entry)
+
+
+            print(existing_entry)
+            print(show_fitbit_data_lst)
             db.session.commit()
 
-            return render_template('showfitbitdata.html', data = rendered_data, type_of_data = type_of_data, type_of_activity = type_of_activity)
-
+            return render_template('showfitbitdata.html', show_fitbit_data_lst=show_fitbit_data_lst)
         else:
             print('ERROR')
             flash('ERROR FOR RN')

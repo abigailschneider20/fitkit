@@ -8,24 +8,10 @@
 <h2 class="form-signin-heading">Your FitBit Data</h2>
      <br><br>
 <div>
-<ul>{% for i in data %}
-     {% if type_of_data == 'sleep' %}
-        <li>Date: {{i['dateOfSleep']}} <br> Duration: {{i['minutesAsleep']//60}} hours and {{i['minutesAsleep']% 60}} mins <br></li>
-     {% elif type_of_data == 'activities-heart' %}
-        <li>Date: {{i['dateTime']}} <br> Resting Heart Rate: {{i['value']['restingHeartRate']}} <br></li>
-     {% else %}
-        {% if type_of_activity == 'activities-steps' %}
-            <li> Date: {{i['dateTime']}} <br> Steps: {{i['value']}} <br> </li>
-        {% elif type_of_activity == 'activities-minutesSedentary' %}
-            <li> Date: {{i['dateTime']}} <br> Minutes Sedentary: {{i['value']}} <br> </li>
-        {% elif type_of_activity == 'activities-minutesFairlyActive' %}
-            <li>Date: {{i['dateTime']}} <br> Fairly Active Minutes: {{i['value']}} <br></li>
-        {% elif type_of_activity == 'activities-minutesLightlyActive' %}
-            <li> Date: {{i['dateTime']}} <br> Lightly Active Minutes: {{i['value']}} <br></li>
-        {% else %}
-            <li>Date: {{i['dateTime']}} <br> Very Active Minutes: {{i['value']}} <br></li>
-      {% endif %}
-    {% endif %} 
+<ul>{% for i in show_fitbit_data_lst %}
+      <b>Date: {{i.date}}</b> <br>
+      {{i.val}} {{i.activity.activity_name}} <br>
+ 
   {% endfor %}
 
 </ul>
