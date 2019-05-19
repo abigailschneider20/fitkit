@@ -151,6 +151,7 @@ def export_fitbitdata():
                     existing_entry = DailyEntry.query.filter(DailyEntry.date == i['dateOfSleep'], DailyEntry.type_id == (activity_typeid_dict[type_of_data])).first()
                     if existing_entry:
                         existing_entry = existing_entry
+                        show_fitbit_data_lst.append(existing_entry)
                     else: 
                         new_entry = DailyEntry(user_id = session['user_id'], type_id = activity_typeid_dict[type_of_data], val = i['minutesAsleep'], date = i['dateOfSleep'])  
                         db.session.add(new_entry)
@@ -158,6 +159,7 @@ def export_fitbitdata():
                     existing_entry = DailyEntry.query.filter(DailyEntry.date == i['dateTime'], DailyEntry.type_id == (activity_typeid_dict[type_of_data])).first()
                     if existing_entry:
                         existing_entry = existing_entry
+                        show_fitbit_data_lst.append(existing_entry)
                     else:
                         new_entry = DailyEntry(user_id = session['user_id'], type_id = activity_typeid_dict[type_of_data], val = i['value']['restingHeartRate'], date = i['dateTime'])
                         db.session.add(new_entry)
@@ -166,6 +168,7 @@ def export_fitbitdata():
                         existing_entry = DailyEntry.query.filter(DailyEntry.date == i['dateTime'], DailyEntry.type_id == (activity_typeid_dict[type_of_data])).first()
                         if existing_entry:
                             existing_entry = existing_entry
+                            show_fitbit_data_lst.append(existing_entry)
                         else:
                             new_entry = DailyEntry(user_id = session['user_id'], type_id = activity_typeid_dict[type_of_activity], val = i['value'], date = i['dateTime'])
                             db.session.add(new_entry)
@@ -177,14 +180,11 @@ def export_fitbitdata():
                             new_entry = DailyEntry(user_id = session['user_id'], type_id = activity_typeid_dict[type_of_activity], val = i['value'], date = i['dateTime'])
 
                         db.session.add(new_entry)
-
                         show_fitbit_data_lst.append(new_entry)
 
-                if existing_entry:
-                    show_fitbit_data_lst.append(existing_entry)
 
 
-            print(existing_entry)
+
             print(show_fitbit_data_lst)
             db.session.commit()
 
