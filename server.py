@@ -4,7 +4,10 @@ from jinja2 import StrictUndefined
 import os
 from pprint import pformat
 import json
-
+import random
+from random_user import Anxiety, Depression, Insomnia, UnaffectedUser
+import numpy
+from datetime import date, timedelta, datetime
 import requests
 from flask import Flask, render_template, request, flash, redirect, session, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
@@ -43,6 +46,7 @@ def process_registration():
     db.session.add(new_user)
     db.session.commit()
     session['user_id'] = new_user.user_id
+
 
     flash('Welcome!')
 
@@ -137,6 +141,8 @@ def export_fitbitdata():
 
 
             data = (response).json()
+            print(data)
+            print(type_of_data)
 
             show_fitbit_data_lst = []
 
@@ -145,7 +151,7 @@ def export_fitbitdata():
             else:
                 rendered_data = data[type_of_activity]
         
-
+           
             for i in rendered_data:
                 if type_of_data == 'sleep':
                     existing_entry = DailyEntry.query.filter(DailyEntry.date == i['dateOfSleep'], DailyEntry.type_id == (activity_typeid_dict[type_of_data])).first()
@@ -178,21 +184,53 @@ def export_fitbitdata():
                             new_entry.val += (int(i['value']))
                         else:
                             new_entry = DailyEntry(user_id = session['user_id'], type_id = activity_typeid_dict[type_of_activity], val = i['value'], date = i['dateTime'])
-
                         db.session.add(new_entry)
                         show_fitbit_data_lst.append(new_entry)
+                print(show_fitbit_data_lst)
+                # if existing_entry:
+                #     show_fitbit_data_lst.append(existing_entry)
+                # else:
+                #     show_fitbit_data_lst.append(new_entry)
 
-
-
-
-            print(show_fitbit_data_lst)
             db.session.commit()
 
             return render_template('showfitbitdata.html', show_fitbit_data_lst=show_fitbit_data_lst)
         else:
-            print('ERROR')
-            flash('ERROR FOR RN')
-            return redirect ('/getfit')
+            date1 = datetime.strptime(date1,'%Y-%m-%d' )
+            date2 = datetime.strptime(date2, '%Y-%m-%d')
+            day = timedelta(days=1)
+            show_fitbit_data_lst = []
+            classes = (Anxiety, Depression, Insomnia, UnaffectedUser)
+            probs = (0.18, 0.08, 0.25, 0.49)
+            new_user_list = []
+            new_user_class= numpy.random.choice((classes), p=probs)
+            for i in range((date2-date1).days + 1):
+                new_user_data = new_user_class(session['user_id'])
+                if type_of_data == "activities-heart":
+                    new_user = DailyEntry(user_id = new_user_data.user_id, type_id = 5, val = new_user_data.resting_hr, date = (date1 + timedelta(days=i)))
+                    db.session.add(new_user)
+                    show_fitbit_data_lst.append(new_user)
+                elif type_of_data == "sleep":
+                    new_user = DailyEntry(user_id = new_user_data.user_id, type_id = 2, val = new_user_data.mins_sleep, date = (date1+timedelta(days=i)))
+                    db.session.add(new_user)
+                    show_fitbit_data_lst.append(new_user)
+                elif type_of_data == "steps":
+                    if type_of_activity == "minutesSedentary":
+                        new_user = DailyEntry(user_id = new_user_data.user_id, type_id = 4, val = new_user_data.mins_sedentary, date =(date1+timedelta(days=1)))
+                        db.session.add(new_user)
+                        show_fitbit_data_lst.append(new_user)
+                    elif type_of_activity == "activities-steps":
+                        new_user = DailyEntry(user_id = new_user_data.user_id, type_id = 1, val = new_user_data.steps, date = (date1+timedelta(days=1)))
+                        db.session.add(new_user)
+                        show_fitbit_data_lst.append(new_user)
+                    else:
+                        new_user = DailyEntry(user_id = new_user_data.user_id, type_id = 3, val = new_user_data.mins_exercise, date = (date1+timedelta(days=1)))
+                        db.session.add(new_user)
+                        show_fitbit_data_lst.append(new_user)
+
+            db.session.add(new_user)
+            db.session.commit()
+            return render_template('showfitbitdata.html', show_fitbit_data_lst=show_fitbit_data_lst)
             
                 #weather sunlight correlation to mental health
                 #endpoint that returns dynamic image of chart to front end
@@ -211,10 +249,9 @@ def export_fitbitdata():
         flash('Please provide all of the required information')
         return redirect('/getfit')
 
-
-def create_seed_file(rendered_data):
-    print(rendered_data)
-
+# @app.route('/showfitbitdata')
+# def show_fitbit_data():
+    
 @app.route('/newtest', methods = ['GET'])
 def navigate_to_tests():
     return render_template('newtest.html')
