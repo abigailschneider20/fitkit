@@ -161,6 +161,7 @@ def export_fitbitdata():
                     else: 
                         new_entry = DailyEntry(user_id = session['user_id'], type_id = activity_typeid_dict[type_of_data], val = i['minutesAsleep'], date = i['dateOfSleep'])  
                         db.session.add(new_entry)
+                        show_fitbit_data_lst.append(new_entry)
                 elif type_of_data == 'activities-heart':
                     existing_entry = DailyEntry.query.filter(DailyEntry.date == i['dateTime'], DailyEntry.type_id == (activity_typeid_dict[type_of_data])).first()
                     if existing_entry:
@@ -169,6 +170,7 @@ def export_fitbitdata():
                     else:
                         new_entry = DailyEntry(user_id = session['user_id'], type_id = activity_typeid_dict[type_of_data], val = i['value']['restingHeartRate'], date = i['dateTime'])
                         db.session.add(new_entry)
+                        show_fitbit_data_lst.append(new_entry)
                 else:
                     if type_of_activity == 'activities-minutesSedentary':
                         existing_entry = DailyEntry.query.filter(DailyEntry.date == i['dateTime'], DailyEntry.type_id == (activity_typeid_dict[type_of_data])).first()
@@ -178,6 +180,7 @@ def export_fitbitdata():
                         else:
                             new_entry = DailyEntry(user_id = session['user_id'], type_id = activity_typeid_dict[type_of_activity], val = i['value'], date = i['dateTime'])
                             db.session.add(new_entry)
+                            show_fitbit_data_lst.append(new_entry)
                     else:
                         new_entry = DailyEntry.query.filter(DailyEntry.date == (i['dateTime']), DailyEntry.type_id == (activity_typeid_dict[type_of_activity])).first()
                         if new_entry:
@@ -186,7 +189,6 @@ def export_fitbitdata():
                             new_entry = DailyEntry(user_id = session['user_id'], type_id = activity_typeid_dict[type_of_activity], val = i['value'], date = i['dateTime'])
                         db.session.add(new_entry)
                         show_fitbit_data_lst.append(new_entry)
-                print(show_fitbit_data_lst)
                 # if existing_entry:
                 #     show_fitbit_data_lst.append(existing_entry)
                 # else:
@@ -249,16 +251,42 @@ def export_fitbitdata():
         flash('Please provide all of the required information')
         return redirect('/getfit')
 
-# @app.route('/showfitbitdata')
-# def show_fitbit_data():
-    
+@app.route('/ehrtemplate', methods = ['GET'])
+def show_ehr_template():
+    return render_template('ehrtemplate.html')
+
+@app.route('/chart', methods = ['GET'])
+def show_chart():
+    return render_template('chart.html')
+
 @app.route('/newtest', methods = ['GET'])
 def navigate_to_tests():
     return render_template('newtest.html')
 
 @app.route('/newtest', methods = ['POST'])
 def insert_answers_into_db():
-    return redirect ('/user_profile')
+    test_type = request.form.get('testtype')
+
+    if test_type == 'phq':
+        new_test = PHQ(user_id = session['user_id'], date = date.today().strftime('%Y-%m-%d'), 
+            q1_answer = request.form.get('q1phq'),
+            q2_answer = request.form.get('q2phq'),
+            q3_answer = request.form.get('q3phq'),
+            q4_answer = request.form.get('q4phq'),
+            q5_answer = request.form.get('q5phq'),
+            q6_answer = request.form.get('q6phq'),
+            q7_answer = request.form.get('q7phq'),
+            q8_answer = request.form.get('q8phq'),
+            q9_answer = request.form.get('q9phq'))
+        db.session.add(new_test)
+        db.session.commit()
+        #score and severity
+        flash('You successfully submitted your results.')
+        return redirect ('/user_profile')
+    else:
+        print('error')
+        return redirect('/newtest')
+
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
