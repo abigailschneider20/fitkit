@@ -1,16 +1,40 @@
 {% extends 'base.html' %}
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+<script src="https://code.jquery.com/jquery.js"></script>
+{% endblock %}
 
 {% block body %}
-<script
-  src="https://code.jquery.com/jquery-3.4.1.js"
-  integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
-  crossorigin="anonymous"></script>
+
 <h2 class="form-signin-heading">Your FitBit Data</h2>
      <br><br>
 <div>
 <ul> 
 
   Insert Chart here:
+  <div class = 'lineChart'>
+  <canvas id='lineChart'></canvas>
+  <div id='lineLegend'></div>
+</div>
+
+<script>
+  const options = {
+    responsive: true
+  };
+
+  // Make line graph of data currently available
+  let ctx = $('#lineChart').get(0).getContext('2d');
+
+  $.get('/chartdata.json', (data)=> {
+    let myLineChart = Chart.Line(ctx, {
+      data: data,
+      options: options
+    });
+    $('#lineLegend').html(myLineChart.generateLegend());
+  });
+
+
+</script>
 
 </ul>
 </div>

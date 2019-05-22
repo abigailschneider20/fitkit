@@ -14,11 +14,18 @@ def load_users():
     # Read u.user file and insert data
     for row in open("seed_data/u.user"):
         row = row.rstrip()
-        user_id, email, password = row.split("|")
+        (user_id, email, password, f_name, l_name,
+            sex, age, weight, height) = row.split("|")
 
         user = User(user_id=user_id,
                     email = email,
-                    password = password)
+                    password = password, 
+                    f_name = f_name,
+                    l_name = l_name, 
+                    sex = sex, 
+                    age = age,
+                    weight = weight, 
+                    height = height)
 
         db.session.add(user)
 
@@ -143,12 +150,12 @@ def load_sleep():
     Sleep.query.delete()
 
     for row in open("seed_data/u.sleep"):
-        (sleep_id, user_id, date, q1, q2, 
-        q3, q4, q5, q6, q7, q8, q9, q10, score,
-        insomnia_severity) = row.split("|")
+        (sleep, user, date, q1, q2,
+        q3, q4, q5, q6, q7, score,
+        insomnia)= row.split("|")
 
-        sleep = Sleep(sleep_id = sleep_id, 
-                    user_id = user_id,
+        sleep = Sleep(sleep_id = sleep, 
+                    user_id = user,
                     date = date, 
                     q1_answer = q1, 
                     q2_answer = q2, 
@@ -156,12 +163,9 @@ def load_sleep():
                     q4_answer = q4, 
                     q5_answer = q5,
                     q6_answer = q6, 
-                    q7_answer = q7,  
-                    q8_answer= q8, 
-                    q9_answer = q9,
-                    q10_answer = q10, 
+                    q7_answer = q7,   
                     score = score, 
-                    insomnia_severity = insomnia_severity)
+                    insomnia_severity = insomnia)
 
         db.session.add(sleep)
         

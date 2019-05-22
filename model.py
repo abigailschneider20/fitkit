@@ -21,6 +21,13 @@ class User(db.Model):
     email = db.Column(db.String(80), nullable=True)
     password = db.Column(db.String(40), nullable=True)
     has_signed_hipaa = db.Column(db.Boolean, default = True)
+    f_name = db.Column(db.String(80), nullable = True)
+    l_name = db.Column(db.String(80), nullable = True)
+    sex = db.Column(db.String(1), nullable = True)
+    age = db.Column(db.Integer, nullable = True)
+    weight = db.Column(db.Integer, nullable = True)
+    height = db.Column(db.Float, nullable = True)
+    
 
     def __repr__(self):
         return f"<User user_id={self.user_id} email={self.email}>"
@@ -103,6 +110,8 @@ class DailyEntry(db.Model):
 #     def __repr__(self):
 #         return f"<Monthly Metric user_id={self.user_id} entry_id={self.entry_id}>"
 
+
+
 class PHQ(db.Model):
     """User question values for PHQ9"""
 
@@ -121,7 +130,7 @@ class PHQ(db.Model):
     q8_answer = db.Column(db.Integer, nullable = True)
     q9_answer = db.Column(db.Integer, nullable = True)
     score = db.Column(db.Integer, nullable = True)
-    dep_severity = db.Column(db.String(20), nullable = True)
+    dep_severity = db.Column(db.String(80), nullable = True)
     
 
     user = db.relationship('User', 
@@ -147,7 +156,7 @@ class GAD(db.Model):
     q6_answer = db.Column(db.Integer, nullable = True)
     q7_answer = db.Column(db.Integer, nullable = True)
     score = db.Column(db.Integer, nullable = True)
-    anx_severity = db.Column(db.String(20), nullable = True)
+    anx_severity = db.Column(db.String(80), nullable = True)
 
     user = db.relationship('User', 
                             backref = db.backref('gad', 
@@ -170,11 +179,8 @@ class Sleep(db.Model):
     q5_answer = db.Column(db.Integer, nullable = True)
     q6_answer = db.Column(db.Integer, nullable = True)
     q7_answer = db.Column(db.Integer, nullable = True)
-    q8_answer = db.Column(db.Integer, nullable = True)
-    q9_answer = db.Column(db.Integer, nullable = True)
-    q10_answer = db.Column(db.Integer, nullable= True)
     score = db.Column(db.Integer, nullable = True)
-    insomnia_severity = db.Column(db.String(20), nullable = True)
+    insomnia_severity = db.Column(db.String(80), nullable = True)
 
 
     user = db.relationship('User', 

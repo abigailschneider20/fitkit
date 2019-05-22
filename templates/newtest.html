@@ -1,14 +1,18 @@
 {% extends 'base.html' %}
 
+
+
 {% block body %}
 
 <h2 class="form-signin-heading">Take a New Test</h2>
     <form action="/newtest" method="POST">
+
        <!-- insert calendar plugin function to get date1 and date2, unless only specify today -->
     <!--    Find how to get data and input into db
     Implement javascript to show/hide forms that have/have not been selected to be taken
  -->
        <select name = "testtype"> Select which test you would like to take:
+        <option> Select </option>
         <option value = "phq"> Patient Health Questionnaire (PHQ9: to assess degree of depression severity) </option>
         <option value = "gad"> Generalized Anxiety Disorder (GAD7: to assess degree of anxiety severity) </option>
         <option value = "sleep"> Sleep Questionnaire (To assess degree of insomnia severity) </option>
@@ -17,52 +21,51 @@
 
 <!--       on submit, show/hide form selected to allow for completion of test. -->
 
-
     <h3> Generalized Anxiety Disorder Evaluation (GAD7) </h3>
     <h4> A seven question test designed to assess the degree of anxiety severity. </h4>
   <h5> How often have you been bothered by the following over the past two weeks? </h5>
     <body>
       <div>
         Question 1: Feeling nervous, anxious, or on edge? <br> 
-        <input type = "radio" name = "q1" value = "0"> Not at All <br>
-        <input type = "radio" name = "q1" value = "1"> Several days <br>
-        <input type = "radio" name = "q1" value = "2"> More than half the days <br>
-        <input type = "radio" name = "q1" value = "3"> Nearly every day <br>
+        <input type = "radio" name = "q1gad" value = "0"> Not at All <br>
+        <input type = "radio" name = "q1gad" value = "1"> Several days <br>
+        <input type = "radio" name = "q1gad" value = "2"> More than half the days <br>
+        <input type = "radio" name = "q1gad" value = "3"> Nearly every day <br>
         Question 2: Not being able to stop or control worrying? <br> 
-        <input type = "radio" name = "q2" value = "0"> Not at All <br>
-        <input type = "radio" name = "q2" value = "1"> Several days <br>
-        <input type = "radio" name = "q2" value = "2"> More than half the days <br>
-        <input type = "radio" name = "q2" value = "3"> Nearly every day <br>
+        <input type = "radio" name = "q2gad" value = "0"> Not at All <br>
+        <input type = "radio" name = "q2gad" value = "1"> Several days <br>
+        <input type = "radio" name = "q2gad" value = "2"> More than half the days <br>
+        <input type = "radio" name = "q2gad" value = "3"> Nearly every day <br>
 
         Question 3: Worrying too much about different things? <br> 
-        <input type = "radio" name = "q3" value = "0"> Not at All <br>
-        <input type = "radio" name = "q3" value = "1"> Several days <br>
-        <input type = "radio" name = "q3" value = "2"> More than half the days <br>
-        <input type = "radio" name = "q3" value = "3"> Nearly every day <br>
+        <input type = "radio" name = "q3gad" value = "0"> Not at All <br>
+        <input type = "radio" name = "q3gad" value = "1"> Several days <br>
+        <input type = "radio" name = "q3gad" value = "2"> More than half the days <br>
+        <input type = "radio" name = "q3gad" value = "3"> Nearly every day <br>
 
         Question 4: Trouble relaxing? <br> 
-        <input type = "radio" name = "q4" value = "0"> Not at All <br>
-        <input type = "radio" name = "q4" value = "1"> Several days <br>
-        <input type = "radio" name = "q4" value = "2"> More than half the days <br>
-        <input type = "radio" name = "q4" value = "3"> Nearly every day <br>
+        <input type = "radio" name = "q4gad" value = "0"> Not at All <br>
+        <input type = "radio" name = "q4gad" value = "1"> Several days <br>
+        <input type = "radio" name = "q4gad" value = "2"> More than half the days <br>
+        <input type = "radio" name = "q4gad" value = "3"> Nearly every day <br>
 
         Question 5: Being so restless that it's hard to sit still? <br> 
-        <input type = "radio" name = "q5" value = "0"> Not at All <br>
-        <input type = "radio" name = "q5" value = "1"> Several days <br>
-        <input type = "radio" name = "q5" value = "2"> More than half the days <br>
-        <input type = "radio" name = "q5" value = "3"> Nearly every day <br>
+        <input type = "radio" name = "q5gad" value = "0"> Not at All <br>
+        <input type = "radio" name = "q5gad" value = "1"> Several days <br>
+        <input type = "radio" name = "q5gad" value = "2"> More than half the days <br>
+        <input type = "radio" name = "q5gad" value = "3"> Nearly every day <br>
 
         Question 6: Becoming easily annoyed or irritable? <br> 
-        <input type = "radio" name = "q6" value = "0"> Not at All <br>
-        <input type = "radio" name = "q6" value = "1"> Several days <br>
-        <input type = "radio" name = "q6" value = "2"> More than half the days <br>
-        <input type = "radio" name = "q6" value = "3"> Nearly every day <br>
+        <input type = "radio" name = "q6gad" value = "0"> Not at All <br>
+        <input type = "radio" name = "q6gad" value = "1"> Several days <br>
+        <input type = "radio" name = "q6gad" value = "2"> More than half the days <br>
+        <input type = "radio" name = "q6gad" value = "3"> Nearly every day <br>
 
         Question 7: Feeling afraid as if something awful might happen? <br> 
-        <input type = "radio" name = "q7" value = "0"> Not at All <br>
-        <input type = "radio" name = "q7" value = "1"> Several days <br>
-        <input type = "radio" name = "q7" value = "2"> More than half the days <br>
-        <input type = "radio" name = "q7" value = "3"> Nearly every day <br>
+        <input type = "radio" name = "q7gad" value = "0"> Not at All <br>
+        <input type = "radio" name = "q7gad" value = "1"> Several days <br>
+        <input type = "radio" name = "q7gad" value = "2"> More than half the days <br>
+        <input type = "radio" name = "q7gad" value = "3"> Nearly every day <br>
         <button type="submit">Submit
         </button>
 
@@ -183,10 +186,34 @@
 
         <button type="submit">Submit
         </button>
-
         
         </div>
       </body>
     </form>
+
+<script src="https://code.jquery.com/jquery-3.4.1.js"
+  integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+  crossorigin="anonymous"></script>
+<script type = "text/javascript">
+    $('event.target').change(function(){
+        if ($(this).val() == "phq"){
+            $('.phqform').show();
+            $('.gadform').hide();
+            $('.sleepform').hide();
+        } else if ($(this).val()== "gad"){
+            $('.gadform').show();
+            $('.sleepform').hide();
+            $('.phqform').hide();
+        } else if ($(this).val() == "sleep"){
+            $('.sleepform').show();
+            $('.gadform').hide();
+            $('.phqform').hide();
+        } else {
+            $('.sleepform').hide();
+            $('.phqform').hide();
+            $('.gadform').hide();
+        }
+    }
+</script>
 
 {% endblock %}

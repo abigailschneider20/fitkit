@@ -58,4 +58,35 @@ def generate_random(user_id):
     probs = (0.18, 0.08, 0.25, 0.49)
     new_user = np.random.choice((classes), p=probs)(user_id)
     
-    
+
+def assess_phq(score):
+    if score >=0 and score <=4:
+        return 'None'
+    elif score >=5 and score <=9:
+        return 'Mild'
+    elif score >=10 and score <=14:
+        return 'Moderate'
+    elif score >= 15 and score <=19:
+        return 'Moderately Severe'
+    else:
+        return 'Severe'
+
+def assess_sleep(score):
+    if score >=0 and score <=7:
+        return 'None'
+    elif score >=8 and score <=14:
+        return 'Subthreshold insomnia'
+    elif score >=15 and score <=21:
+        return 'Moderate severity clinical insomnia'
+    elif score >= 22 and score <=28:
+        return 'Severe clinical insomnia'
+
+def assess_gad(score):
+    if score >=0 and score <=5:
+        return 'None'
+    elif score >=6 and score <=10:
+        return 'Mild'
+    elif score >=11 and score <=15:
+        return 'Moderate'
+    else:
+        return 'Severe'
