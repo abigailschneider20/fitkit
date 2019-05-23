@@ -1,8 +1,4 @@
 {% extends 'base.html' %}
-{% block head %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
-<script src="https://code.jquery.com/jquery.js"></script>
-{% endblock %}
 
 {% block body %}
 
@@ -10,6 +6,13 @@
      <br><br>
 <div>
 <ul> 
+<form action = "/chartdata.json"> Select what type of data you would like to chart: <br>
+  <input type = "radio" name = "chart_type" value = "phq"> PHQ9 Scores <br>
+  <input type = "radio" name = "chart_type" value = "gad"> GAD7 Scores <br>
+  <input type = "radio" name = "chart_type" value = "sleep"> Sleep Questionnaire Scores <br>
+     <button type="submit">Submit 
+        </button>
+  </form>
 
   Insert Chart here:
   <div class = 'lineChart'>
@@ -27,9 +30,9 @@
 
   $.get('/chartdata.json', (data)=> {
     let myLineChart = Chart.Line(ctx, {
-      data: data,
-      options: options
-    });
+                            data: data,
+                            options: options
+                        });
     $('#lineLegend').html(myLineChart.generateLegend());
   });
 
