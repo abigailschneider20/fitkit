@@ -21,12 +21,14 @@
 </div>
 
 <script>
-  const options = {
-    responsive: true
-  };
+
 
   // Make line graph of data currently available
   let ctx = $('#lineChart').get(0).getContext('2d');
+
+  const options = {
+    responsive: true
+  }
 
   $.get('/chartdata.json', (data)=> {
     let myLineChart = Chart.Line(ctx, {
@@ -35,7 +37,6 @@
                         });
     $('#lineLegend').html(myLineChart.generateLegend());
   });
-
 
 </script>
 
@@ -46,3 +47,120 @@
   <h3> <form action = '/chart' method = 'GET'><a href = '/chart'> View Chart </a></form></h3>
   <h3><form action = '/ehrtemplate' method = 'GET'><a href = '/ehrtemplate'> Convert Data to EHR Template </a></span>
 {% endblock %}
+
+const data = {
+    labels: [new Date(2019, 05, 21), new Date(2019, 05, 22), new Date(2019, 05, 23)],
+    datasets: [{
+      label: "PHQ9 Scores", 
+      fill: false,
+      lineTension: 0.5,
+      backgroundColor: "rgba(151,187,205,0.2)",
+      borderColor: "blue",
+      borderCapStyle: "butt",
+      borderDash: [],
+      borderDashOffset: 0.0,
+      borderJoinStyle: "miter",
+      pointBorderColor: "rgba(151,187,205,1)", 
+      pointBackgroundColor: "#fff",
+      pointBorderWidth: 1,
+      pointHoverRadius: 8,
+      pointHoverBackgroundColor: "#fff",
+      pointHoverBorderColor: "rgba(151,187,205,1)",
+      pointHoverBorderWidth: 2,
+      pointRadius: 4,
+      pointHitRadius: 10,
+      data: [280, 250, 340],
+      spanGaps: false,
+    }, {
+      label: "GAD7 Scores",
+      fill:false,
+      lineTension:0.5,
+      backgroundColor: "red", 
+      borderColor: "orange", 
+      borderCapStyle: "butt",
+      borderDash: [],
+      borderDashOffset: 0.0,
+      borderJoinStyle: "miter",
+      pointBorderColor: "rgba(151,187,205,1)", 
+      pointBackgroundColor: "#fff",
+      pointBorderWidth: 1,
+      pointHoverRadius: 8,
+      pointHoverBackgroundColor: "#fff",
+      pointHoverBorderColor: "rgba(151,187,205,1)",
+      pointHoverBorderWidth: 2,
+      pointRadius: 4,
+      pointHitRadius: 10,
+      data: [200, 200, 200],
+      spanGaps: false,
+    }, {
+      label: "Sleep Questionnaire Scores",
+      fill:false,
+      lineTension:0.5,
+      backgroundColor: "red", 
+      borderColor: "orange", 
+      borderCapStyle: "butt",
+      borderDash: [],
+      borderDashOffset: 0.0,
+      borderJoinStyle: "miter",
+      pointBorderColor: "rgba(151,187,205,1)", 
+      pointBackgroundColor: "#fff",
+      pointBorderWidth: 1,
+      pointHoverRadius: 8,
+      pointHoverBackgroundColor: "#fff",
+      pointHoverBorderColor: "rgba(151,187,205,1)",
+      pointHoverBorderWidth: 2,
+      pointRadius: 4,
+      pointHitRadius: 10,
+      data: [100, 100, 100],
+      spanGaps: false,
+    }, {
+      label: "FitBit Data",
+      fill:false,
+      lineTension:0.5,
+      backgroundColor: "red", 
+      borderColor: "orange", 
+      borderCapStyle: "butt",
+      borderDash: [],
+      borderDashOffset: 0.0,
+      borderJoinStyle: "miter",
+      pointBorderColor: "rgba(151,187,205,1)", 
+      pointBackgroundColor: "#fff",
+      pointBorderWidth: 1,
+      pointHoverRadius: 8,
+      pointHoverBackgroundColor: "#fff",
+      pointHoverBorderColor: "rgba(151,187,205,1)",
+      pointHoverBorderWidth: 2,
+      pointRadius: 4,
+      pointHitRadius: 10,
+      data: [300, 300, 300],
+      spanGaps: false,
+    }
+    ]
+  };
+
+  
+
+  const options = {
+    responsive: true,
+    scales: {
+      yAxes: [{
+        ticks: {
+          beginAtZero: true,
+          labelString: "Data"
+        },
+        scaleLabel: {
+          display: true,
+          labelString: "Scores",
+
+        }
+      }]
+      xAxes: [{
+        type: "time",
+        display: true,
+        scaleLabel: {
+          display:true,
+          labelString: "Date"
+        }
+      }]
+    }
+  }

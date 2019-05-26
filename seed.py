@@ -1,6 +1,6 @@
 from sqlalchemy import func
 
-from model import connect_to_db, db, User, MetricType, DailyEntry, GAD, PHQ, Sleep
+from model import connect_to_db, db, User, DailyEntry, GAD, PHQ, Sleep
 from server import app
 
 
@@ -28,20 +28,6 @@ def load_users():
                     height = height)
 
         db.session.add(user)
-
-    db.session.commit()
-
-def load_metrictypes():
-    """Load metric types from u.metrictypes into database."""
-    MetricType.query.delete()
-
-    for row in open("seed_data/u.metrictypes"):
-        row = row.rstrip()
-        type_id, activity_name = row.split("|")
-
-        metrictype = MetricType(type_id = type_id, activity_name = activity_name)
-
-        db.session.add(metrictype)
 
     db.session.commit()
 
@@ -177,13 +163,16 @@ def load_dailyentries():
     DailyEntry.query.delete()
 
     for row in open("seed_data/u.dailymetrics"):
-        entry, user, type_id, val, date = row.split("|")
+        entry, user, date, steps, sleep, mins_sedentary, mins_exercise, resting_hr = row.split("|")
 
         daily = DailyEntry(entry_id = entry,
                                 user_id = user,
-                                type_id = type_id,
-                                val = val,
-                                date = date)
+                                date = date,
+                                steps = steps,
+                                sleep = sleep,
+                                mins_sedentary = mins_sedentary,
+                                mins_exercise = mins_exercise,
+                                resting_hr = resting_hr)
 
         db.session.add(daily)
 
@@ -198,7 +187,6 @@ if __name__ == "__main__":
 
     # Import different types of data
     load_users()
-    load_metrictypes()
     load_dailyentries()
     load_phq()
     load_gad()

@@ -30,16 +30,6 @@ class User(db.Model):
     def __repr__(self):
         return f"<User user_id={self.user_id} email={self.email}>"
 
-class MetricType(db.Model):
-    """ Middle table representing types of metrics exported from FitBit"""
-    
-    __tablename__ = "metrictypes"
-
-    type_id = db.Column(db.Integer, autoincrement = True, primary_key = True)
-    activity_name = db.Column(db.String(30), nullable = False)
-
-    def __repr__(self):
-        return f"<Activity Type type_id={self.type_id} activity_name={self.activity_name}>"
 
 
 class DailyEntry(db.Model):
@@ -49,21 +39,19 @@ class DailyEntry(db.Model):
 
     entry_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
-    type_id = db.Column(db.Integer, db.ForeignKey('metrictypes.type_id'))
-    val = db.Column(db.Integer)
     date = db.Column(db.Date)
-
+    steps = db.Column(db.Integer, nullable = True)
+    sleep = db.Column(db.Integer, nullable = True)
+    mins_sedentary = db.Column(db.Integer, nullable = True)
+    mins_exercise = db.Column(db.Integer, nullable = True)
+    resting_hr = db.Column(db.Integer, nullable = True)
 
     user = db.relationship('User', 
                             backref = db.backref('dailymetrics', 
                                 order_by = user_id))
 
-    activity = db.relationship('MetricType',
-                                backref = db.backref('dailyentries', 
-                                    order_by = type_id))
-
     def __repr__(self):
-        return f"<Daily Entry user_id={self.user_id} entry_id={self.entry_id} type_id ={self.type_id}>"
+        return f"<Daily Entry user_id={self.user_id} entry_id={self.entry_id}>"
 
 # class WeeklyMetric(db.Model):
 #     """Weekly metrics of users of app"""

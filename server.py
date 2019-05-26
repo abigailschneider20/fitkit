@@ -12,7 +12,7 @@ import requests
 from flask import Flask, render_template, request, flash, redirect, session, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 
-from model import connect_to_db, db, User, MetricType, DailyEntry, PHQ, GAD, Sleep
+from model import connect_to_db, db, User, DailyEntry, PHQ, GAD, Sleep
 
 
 app = Flask(__name__)
@@ -125,133 +125,112 @@ def show_fitbit_form():
     of the days specified in the desired target date range. """
     return render_template('fitbitdata.html')
 
+def download_fitbitdata(date1, date2):
+    #downloads all types of fitbit data for date range
+
+    activity_type_dict = {"sleep": (f"https://api.fitbit.com/1.2/user/-/sleep/date/{date1}/{date2}.json"),
+                    "activities-heart": (f"https://api.fitbit.com/1/user/-/activities/heart/date/{date1}/{date2}.json"), 
+                    "activities-steps": (f"https://api.fitbit.com/1/user/-/activities/steps/date/{date1}/{date2}.json"),
+                    "activities-minutesSedentary": (f"https://api.fitbit.com/1/user/-/activities/minutesSedentary/date/{date1}/{date2}.json"),
+                    "activities-minutesFairlyActive": (f"https://api.fitbit.com/1/user/-/activities/minutesFairlyActive/date/{date1}/{date2}.json"),
+                    "activities-minutesLightlyActive": (f"https://api.fitbit.com/1/user/-/activities/minutesLightlyActive/date/{date1}/{date2}.json"),
+                    "activities-minutesVeryActive": (f"https://api.fitbit.com/1/user/-/activities/minutesVeryActive/date/{date1}/{date2}.json")}
+
+    headers = {'Authorization': 'Bearer ' + FITBIT_TOKEN}
+
+    raw_data = {}
+
+    for k in activity_type_dict:
+        response = requests.get(activity_type_dict[k], headers = headers)
+        data = response.json()
+        print(data)
+        rendered_data = data[k]
+        raw_data[k] = rendered_data
+    return raw_data
+
+def create_newuser_data(date1, date2):
+    #creates new user data to mock import of FitBit data
+    show_fitbit_data_lst = []
+    day = timedelta(days=1)
+    show_fitbit_data_lst = []
+    classes = (Anxiety, Depression, Insomnia, UnaffectedUser)
+    probs = (0.18, 0.08, 0.25, 0.49)
+    new_user_list = []  
+    new_user_class= numpy.random.choice((classes), p=probs)
+    print(new_user_class)
+    new_user = ""
+    for i in range((date2-date1).days + 1):
+        new_user_data = new_user_class(session['user_id'])
+        new_user = DailyEntry(user_id = new_user_data.user_id, date = (date1 + timedelta(days=i)), steps = new_user_data.steps, sleep = new_user_data.mins_sleep, mins_sedentary = new_user.mins_sedentary, mins_exercise = new_user_data.mins_exercise, resting_hr = new_user.resting_hr)
+        db.session.add(new_user)
+        show_fitbit_data_lst.append(new_user)
+        print(new_user)
+
+    print(show_fitbit_data_lst)
+    db.session.commit()
+    return show_fitbit_data_lst
+
+def parse_rawfitbitdata(raw_data):
+    #parse raw fitbit data
+    new_entry = ''
+    existing_entry = ''
+    partial_entry = ''
+    show_fitbit_data_lst = []
+
+    
+    for k in raw_data:
+        for j in range(len(raw_data[k])):
+            if k == 'sleep':
+                existing_entry = DailyEntry.query.filter(DailyEntry.date == raw_data[k][j]['dateOfSleep'], DailyEntry.sleep == raw_data[k][j]['minutesAsleep']).first()
+                if existing_entry == None:
+                    new_entry = DailyEntry(user_id = session['user_id'], date = raw_data[k][j]['dateOfSleep'], sleep = raw_data[k][j]['minutesAsleep'])
+
+            elif k == 'activities-heart':
+                new_entry.resting_hr = raw_data[k][j]['value']['restingHeartRate']
+
+            elif k == 'activities-steps':
+                new_entry.steps = raw_data[k][j]['value']
+
+            elif k == 'activities-minutesSedentary':
+                new_entry.mins_sedentary = raw_data[k][j]['value']
+
+            elif k == 'activities-minutesFairlyActive':
+                new_entry.mins_exercise = 0
+                new_entry.mins_exercise += int(raw_data[k][j]['value'])
+
+            else:
+                new_entry.mins_exercise += int(raw_data[k][j]['value'])
+
+
+            if existing_entry:
+                show_fitbit_data_lst.append(existing_entry)
+            else:
+                show_fitbit_data_lst.append(new_entry)
+                print(new_entry)
+                db.session.add(new_entry)
+            db.session.commit()
+
+    print(show_fitbit_data_lst)
+    return(show_fitbit_data_lst)
+
+
 @app.route('/fitbitdata', methods = ['GET'])
-def export_fitbitdata():
+def fitbitdata():
     date1 = request.args.get('date1') 
-    date2 = request.args.get('date2') #Will get date for fitbit data request
-    type_of_data = request.args.get('type')
-    type_of_activity = request.args.get('activitytype')
-    #Will get whether user wants hr, sleep, or activity data
-    activity_type_dict = {"sleep": f"https://api.fitbit.com/1.2/user/-/sleep/date/{date1}/{date2}.json",
-                    "activities-heart": f"https://api.fitbit.com/1/user/-/activities/heart/date/{date1}/{date2}.json", 
-                    "steps": {"activities-steps": f"https://api.fitbit.com/1/user/-/activities/steps/date/{date1}/{date2}.json",
-                    "activities-minutesSedentary": f"https://api.fitbit.com/1/user/-/activities/minutesSedentary/date/{date1}/{date2}.json",
-                    "activities-minutesFairlyActive": f"https://api.fitbit.com/1/user/-/activities/minutesFairlyActive/date/{date1}/{date2}.json",
-                    "activities-minutesLightlyActive": f"https://api.fitbit.com/1/user/-/activities/minutesLightlyActive/date/{date1}/{date2}.json",
-                    "activities-minutesVeryActive": f"https://api.fitbit.com/1/user/-/activities/minutesVeryActive/date/{date1}/{date2}.json"}}
+    date2 = request.args.get('date2')
+    date1 = datetime.strptime(date1, '%Y-%m-%d').date()
+    date2 = datetime.strptime(date2, '%Y-%m-%d').date()
 
-    activity_typeid_dict = {'activities-steps': 1, 'sleep': 2, 'activities-minutesFairlyActive': 3, 'activities-minutesLightlyActive': 3, 
-                            'activities-minutesVeryActive': 3,'activities-minutesSedentary': 4, 'activities-heart': 5 }
-
-    new_entry = ""
-    existing_entry = ""
-    if date1 and date2 and type_of_data:
+    show_fitbit_data_lst = []
+    if date1 and date2:
         if session['user_id'] == 1:
-            headers = {'Authorization': 'Bearer ' + FITBIT_TOKEN}
-            if type_of_data != 'steps':
-                response = requests.get(activity_type_dict[type_of_data], headers=headers)
-            else:
-                response = requests.get(activity_type_dict["steps"][type_of_activity], headers=headers)
-
-
-            data = (response).json()
-
-            show_fitbit_data_lst = []
-
-            if type_of_data != 'steps':
-                rendered_data = data[type_of_data]
-            else:
-                rendered_data = data[type_of_activity]
-        
-           
-            for i in rendered_data:
-                if type_of_data == 'sleep':
-                    existing_entry = DailyEntry.query.filter(DailyEntry.date == i['dateOfSleep'], DailyEntry.type_id == (activity_typeid_dict[type_of_data])).first()
-                    if existing_entry:
-                        existing_entry = existing_entry
-   
-                    else: 
-                        new_entry = DailyEntry(user_id = session['user_id'], type_id = activity_typeid_dict[type_of_data], val = i['minutesAsleep'], date = i['dateOfSleep'])  
-
-                elif type_of_data == 'activities-heart':
-                    existing_entry = DailyEntry.query.filter(DailyEntry.date == i['dateTime'], DailyEntry.type_id == (activity_typeid_dict[type_of_data])).first()
-                    if existing_entry:
-                        existing_entry = existing_entry
-
-                    else:
-                        new_entry = DailyEntry(user_id = session['user_id'], type_id = activity_typeid_dict[type_of_data], val = i['value']['restingHeartRate'], date = i['dateTime'])
-
-                else:
-                    if type_of_activity == 'activities-minutesSedentary':
-                        existing_entry = DailyEntry.query.filter(DailyEntry.date == i['dateTime'], DailyEntry.type_id == (activity_typeid_dict[type_of_data])).first()
-                        if existing_entry:
-                            existing_entry = existing_entry
-
-                        else:
-                            new_entry = DailyEntry(user_id = session['user_id'], type_id = activity_typeid_dict[type_of_activity], val = i['value'], date = i['dateTime'])
-
-                    else:
-                        new_entry = DailyEntry.query.filter(DailyEntry.date == (i['dateTime']), DailyEntry.type_id == (activity_typeid_dict[type_of_activity])).first()
-                        if new_entry:
-                            new_entry.val += (int(i['value']))
-                        else:
-                            new_entry = DailyEntry(user_id = session['user_id'], type_id = activity_typeid_dict[type_of_activity], val = i['value'], date = i['dateTime'])
-       
-                if existing_entry:
-                    show_fitbit_data_lst.append(existing_entry)
-                else:
-                    show_fitbit_data_lst.append(new_entry)
-                    db.session.add(new_entry)
-
-            db.session.commit()
-
-            return render_template('showfitbitdata.html', show_fitbit_data_lst=show_fitbit_data_lst)
+            date1 = (str(date1))
+            date2 = (str(date2))
+            raw_data = download_fitbitdata(date1, date2)
+            show_fitbit_data_lst = parse_rawfitbitdata(raw_data)
         else:
-            date1 = datetime.strptime(date1,'%Y-%m-%d' )
-            date2 = datetime.strptime(date2, '%Y-%m-%d')
-            day = timedelta(days=1)
-            show_fitbit_data_lst = []
-            classes = (Anxiety, Depression, Insomnia, UnaffectedUser)
-            probs = (0.18, 0.08, 0.25, 0.49)
-            new_user_list = []  #refactor code; allow for new user to export fitbit data for only ONE class and then use that class to get more data;
-                                #for user with existing entry/data, return that data. Find way to access more data from that specific class for existing entries
-                                #Maybe render above template only for person who has user id one and create a new form for other users to get all data and not worry about
-                                #accessing specific values. Use JS in templates to only allow user id 1 to access certain template/reconfigure links
-            new_user_class= numpy.random.choice((classes), p=probs)
-            print(new_user_class)
-            new_user = ""
-            for i in range((date2-date1).days + 1):
-                new_user_data = new_user_class(session['user_id'])
-                if type_of_data == "activities-heart":
-                    new_user = DailyEntry(user_id = new_user_data.user_id, type_id = 5, val = new_user_data.resting_hr, date = (date1 + timedelta(days=i)))
-                    db.session.add(new_user)
-                    show_fitbit_data_lst.append(new_user)
-                elif type_of_data == "sleep":
-                    new_user = DailyEntry(user_id = new_user_data.user_id, type_id = 2, val = new_user_data.mins_sleep, date = (date1+timedelta(days=i)))
-                    db.session.add(new_user)
-                    show_fitbit_data_lst.append(new_user)
-                elif type_of_data == "steps":
-                    if type_of_activity == "minutesSedentary":
-                        new_user = DailyEntry(user_id = new_user_data.user_id, type_id = 4, val = new_user_data.mins_sedentary, date =(date1+timedelta(days=1)))
-                        db.session.add(new_user)
-                        show_fitbit_data_lst.append(new_user)
-                    elif type_of_activity == "activities-steps":
-                        new_user = DailyEntry(user_id = new_user_data.user_id, type_id = 1, val = new_user_data.steps, date = (date1+timedelta(days=1)))
-                        db.session.add(new_user)
-                        show_fitbit_data_lst.append(new_user)
-                    else:
-                        new_user = DailyEntry(user_id = new_user_data.user_id, type_id = 3, val = new_user_data.mins_exercise, date = (date1+timedelta(days=1)))
-                        db.session.add(new_user)
-                        show_fitbit_data_lst.append(new_user)
-
-            db.session.add(new_user)
-            db.session.commit()
-            return render_template('showfitbitdata.html', show_fitbit_data_lst=show_fitbit_data_lst)
-            
-                #weather sunlight correlation to mental health
-                #endpoint that returns dynamic image of chart to front end
-
-
+            results = create_newuser_data(date1, date2)
+        return render_template('showfitbitdata.html', show_fitbit_data_lst = show_fitbit_data_lst)
 
     else:
         flash('Please provide all of the required information')
@@ -287,91 +266,91 @@ def chart_data():
         date = str(n.date.day)
         phq_dict[(date)] = (int(n.score))
 
-    data_dict = {
-    "labels": (list(phq_dict.keys())),
-    "datasets": [
-            {
-                "label": "PHQ Scores",
-                "fill": True,
-                "lineTension": 0.5,
-                "backgroundColor": "rgba(151,187,205,0.2)",
-                "borderColor": "rgba(151,187,205,1)",
-                "borderCapStyle": 'butt',
-                "borderDash": [],
-                "borderDashOffset": 0.0,
-                "borderJoinStyle": 'miter',
-                "pointBorderColor": "rgba(151,187,205,1)",
-                "pointBackgroundColor": "#fff",
-                "pointBorderWidth": 1,
-                "pointHoverRadius": 5,
-                "pointHoverBackgroundColor": "#fff",
-                "pointHoverBorderColor": "rgba(151,187,205,1)",
-                "pointHoverBorderWidth": 2,
-                "pointHitRadius": 10,
-                "data": list(phq_dict.values()),
-                "spanGaps": False},
-            {
-                "label": "GAD Scores",
-                "fill": True,
-                "lineTension": 0.5,
-                "backgroundColor": "rgba(151,187,205,0.2)",
-                "borderColor": "rgba(151,187,205,1)",
-                "borderCapStyle": 'butt',
-                "borderDash": [],
-                "borderDashOffset": 0.0,
-                "borderJoinStyle": 'miter',
-                "pointBorderColor": "rgba(151,187,205,1)",
-                "pointBackgroundColor": "#fff",
-                "pointBorderWidth": 1,
-                "pointHoverRadius": 5,
-                "pointHoverBackgroundColor": "#fff",
-                "pointHoverBorderColor": "rgba(151,187,205,1)",
-                "pointHoverBorderWidth": 2,
-                "pointHitRadius": 10,
-                "data": (list(gad_dict.values())),
-                "spanGaps": False},
-            {
-                "label": "Sleep Questionnaire Scores",
-                "fill": True,
-                "lineTension": 0.5,
-                "backgroundColor": "rgba(151,187,205,0.2)",
-                "borderColor": "rgba(151,187,205,1)",
-                "borderCapStyle": 'butt',
-                "borderDash": [],
-                "borderDashOffset": 0.0,
-                "borderJoinStyle": 'miter',
-                "pointBorderColor": "rgba(151,187,205,1)",
-                "pointBackgroundColor": "#fff",
-                "pointBorderWidth": 1,
-                "pointHoverRadius": 5,
-                "pointHoverBackgroundColor": "#fff",
-                "pointHoverBorderColor": "rgba(151,187,205,1)",
-                "pointHoverBorderWidth": 2,
-                "pointHitRadius": 10,
-                "data": (list(sleep_dict.values())),
-                "spanGaps": False},
-            {
-                "label": "FitBit Data",
-                "fill": True,
-                "lineTension": 0.5,
-                "backgroundColor": "rgba(151,187,205,0.2)",
-                "borderColor": "rgba(151,187,205,1)",
-                "borderCapStyle": 'butt',
-                "borderDash": [],
-                "borderDashOffset": 0.0,
-                "borderJoinStyle": 'miter',
-                "pointBorderColor": "rgba(151,187,205,1)",
-                "pointBackgroundColor": "#fff",
-                "pointBorderWidth": 1,
-                "pointHoverRadius": 5,
-                "pointHoverBackgroundColor": "#fff",
-                "pointHoverBorderColor": "rgba(151,187,205,1)",
-                "pointHoverBorderWidth": 2,
-                "pointHitRadius": 10,
-                "data": (list(metric_dict.values())),
-                "spanGaps": False}]
-    }
-
+        data_dict = {
+        "labels": (list(phq_dict.keys())),
+        "datasets": [
+                {
+                    "label": "PHQ Scores",
+                    "fill": True,
+                    "lineTension": 0.5,
+                    "backgroundColor": "rgba(151,187,205,0.2)",
+                    "borderColor": "rgba(151,187,205,1)",
+                    "borderCapStyle": 'butt',
+                    "borderDash": [],
+                    "borderDashOffset": 0.0,
+                    "borderJoinStyle": 'miter',
+                    "pointBorderColor": "rgba(151,187,205,1)",
+                    "pointBackgroundColor": "#fff",
+                    "pointBorderWidth": 1,
+                    "pointHoverRadius": 5,
+                    "pointHoverBackgroundColor": "#fff",
+                    "pointHoverBorderColor": "rgba(151,187,205,1)",
+                    "pointHoverBorderWidth": 2,
+                    "pointHitRadius": 10,
+                    "data": list(phq_dict.values()),
+                    "spanGaps": False},
+                {
+                    "label": "GAD Scores",
+                    "fill": True,
+                    "lineTension": 0.5,
+                    "backgroundColor": "rgba(151,187,205,0.2)",
+                    "borderColor": "rgba(151,187,205,1)",
+                    "borderCapStyle": 'butt',
+                    "borderDash": [],
+                    "borderDashOffset": 0.0,
+                    "borderJoinStyle": 'miter',
+                    "pointBorderColor": "rgba(151,187,205,1)",
+                    "pointBackgroundColor": "#fff",
+                    "pointBorderWidth": 1,
+                    "pointHoverRadius": 5,
+                    "pointHoverBackgroundColor": "#fff",
+                    "pointHoverBorderColor": "rgba(151,187,205,1)",
+                    "pointHoverBorderWidth": 2,
+                    "pointHitRadius": 10,
+                    "data": (list(gad_dict.values())),
+                    "spanGaps": False},
+                {
+                    "label": "Sleep Questionnaire Scores",
+                    "fill": True,
+                    "lineTension": 0.5,
+                    "backgroundColor": "rgba(151,187,205,0.2)",
+                    "borderColor": "rgba(151,187,205,1)",
+                    "borderCapStyle": 'butt',
+                    "borderDash": [],
+                    "borderDashOffset": 0.0,
+                    "borderJoinStyle": 'miter',
+                    "pointBorderColor": "rgba(151,187,205,1)",
+                    "pointBackgroundColor": "#fff",
+                    "pointBorderWidth": 1,
+                    "pointHoverRadius": 5,
+                    "pointHoverBackgroundColor": "#fff",
+                    "pointHoverBorderColor": "rgba(151,187,205,1)",
+                    "pointHoverBorderWidth": 2,
+                    "pointHitRadius": 10,
+                    "data": (list(sleep_dict.values())),
+                    "spanGaps": False}]
+                            }
+                # {
+                #     "label": "FitBit Data",
+                #     "fill": True,
+                #     "lineTension": 0.5,
+                #     "backgroundColor": "rgba(151,187,205,0.2)",
+                #     "borderColor": "rgba(151,187,205,1)",
+                #     "borderCapStyle": 'butt',
+                #     "borderDash": [],
+                #     "borderDashOffset": 0.0,
+                #     "borderJoinStyle": 'miter',
+                #     "pointBorderColor": "rgba(151,187,205,1)",
+                #     "pointBackgroundColor": "#fff",
+                #     "pointBorderWidth": 1,
+                #     "pointHoverRadius": 5,
+                #     "pointHoverBackgroundColor": "#fff",
+                #     "pointHoverBorderColor": "rgba(151,187,205,1)",
+                #     "pointHoverBorderWidth": 2,
+                #     "pointHitRadius": 10,
+                #     "data": (list(metric_dict.values())),
+                #     "spanGaps": False}]
+        
 
     return jsonify(data_dict)
 

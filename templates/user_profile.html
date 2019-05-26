@@ -12,7 +12,11 @@
     <ul>
     {% for metric in user.dailymetrics %}
         <h4> Data for {{metric.date}} </h4> <br>
-        <li> {{metric.activity.activity_name}} : {{metric.val}}</li> <br>
+        <li> Steps: {{metric.steps}} <br>
+        Sleep: {{metric.sleep}} <br>
+      Sedentary Minutes: {{metric.mins_sedentary}} <br>
+    Active Minutes: {{metric.mins_exercise}} <br>
+  Resting Heart Rate: {{metric.resting_hr}} <br></li> <br>
      
     {% endfor %}
   </ul>

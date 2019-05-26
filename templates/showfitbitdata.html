@@ -10,7 +10,11 @@
 <div>
 <ul>{% for i in show_fitbit_data_lst %}
       <b>Date: {{i.date}}</b> <br>
-      {{i.val}} {{i.activity.activity_name}} <br>
+      Steps: {{i.steps}}  <br>
+      Sleep: {{i.sleep}} <br>
+      Sedentary Minutes: {{i.mins_sedentary}}<br>
+      Active Minutes: {{i.mins_exercise}} <br>
+      Resting Heart Rate: {{i.resting_hr}} <br>
  
   {% endfor %}
 
