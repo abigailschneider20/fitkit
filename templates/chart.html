@@ -6,10 +6,15 @@
      <br><br>
 <div>
 <ul> 
-<form action = "/chartdata.json"> Select what type of data you would like to chart: <br>
-  <input type = "radio" name = "chart_type" value = "phq"> PHQ9 Scores <br>
-  <input type = "radio" name = "chart_type" value = "gad"> GAD7 Scores <br>
-  <input type = "radio" name = "chart_type" value = "sleep"> Sleep Questionnaire Scores <br>
+<form action = "/chart" id = "chartdata" name = "chartdata"> Select what type of data you would like to chart: <br>
+  <input type = "checkbox" class = "chart" name = "chart_type" value = "PHQ9"> PHQ9 Scores <br>
+  <input type = "checkbox" class = "chart" name = "chart_type" value = "GAD7"> GAD7 Scores <br>
+  <input type ="checkbox" class = "chart" name = "chart_type" value = "Insomnia Index"> Sleep Questionnaire Scores <br>
+  <input type = "checkbox" class = "chart" name = "chart_type" value = "Resting Heart Rate"> Heart Rate <br>
+  <input type = "checkbox" class = "chart" name = "chart_type" value = "Steps"> Steps <br>
+  <input type = "checkbox" class = "chart" name = "chart_type" value = "Mins Slept"> Minutes Slept <br>
+  <input type = "checkbox" class = "chart" name = "chart_type" value = "Mins Exercise"> Minutes of Exercise <br>
+  <input type = "checkbox" class = "chart" name = "chart_type" value = "Mins Sedentary"> Sedentary Minutes <br>
      <button type="submit">Submit 
         </button>
   </form>
@@ -22,23 +27,63 @@
 
 <script>
 
-
   // Make line graph of data currently available
+  // Get input out of a form element with jQuery
   let ctx = $('#lineChart').get(0).getContext('2d');
 
   const options = {
-    responsive: true
-  }
+    responsive: true,
+    scales: {
+      xAxes: [{stacked:true}],
+      yAxes: [{
+        ticks: {
+          beginAtZero:true
+        },
+        stacked:false
+      }]
+    }
+  };
 
-  $.get('/chartdata.json', (data)=> {
+  const formInputs = {
+    'chart_type':$("input:checkbox[name='chart_type']:checked", "#chartdata").val()
+  };
+  console.log(formInputs);
+
+  $('#chartdata').submit( (evt)=> {
+    evt.preventDefault();
+     const formInputs = {
+      'chart_type':$("input:checkbox[name='chart_type']:checked", "#chartdata").val()
+    };
+    $.get('/chartdata.json', formInputs, (data)=> {
+      console.log(data);
+      let myLineChart = Chart.Line(ctx, {
+                            data: data,
+                            options: options
+                        });
+    });
+  }); 
+
+  $.get('/chartdata.json', formInputs, (data)=> {
+    console.log(data);
     let myLineChart = Chart.Line(ctx, {
                             data: data,
                             options: options
                         });
-    $('#lineLegend').html(myLineChart.generateLegend());
   });
 
+
+  //   $('#lineLegend').html(myLineChart.generateLegend());
+  // });
+
 </script>
+
+<footer>
+    <div>
+                  <form action = "/logout" method = "POST"> 
+                  <input type = "submit" value = "Log Out"> <!--    Show only when user is logged in using JS -->
+                 </form>
+            </div>
+        </footer>
 
 </ul>
 </div>
@@ -48,119 +93,6 @@
   <h3><form action = '/ehrtemplate' method = 'GET'><a href = '/ehrtemplate'> Convert Data to EHR Template </a></span>
 {% endblock %}
 
-const data = {
-    labels: [new Date(2019, 05, 21), new Date(2019, 05, 22), new Date(2019, 05, 23)],
-    datasets: [{
-      label: "PHQ9 Scores", 
-      fill: false,
-      lineTension: 0.5,
-      backgroundColor: "rgba(151,187,205,0.2)",
-      borderColor: "blue",
-      borderCapStyle: "butt",
-      borderDash: [],
-      borderDashOffset: 0.0,
-      borderJoinStyle: "miter",
-      pointBorderColor: "rgba(151,187,205,1)", 
-      pointBackgroundColor: "#fff",
-      pointBorderWidth: 1,
-      pointHoverRadius: 8,
-      pointHoverBackgroundColor: "#fff",
-      pointHoverBorderColor: "rgba(151,187,205,1)",
-      pointHoverBorderWidth: 2,
-      pointRadius: 4,
-      pointHitRadius: 10,
-      data: [280, 250, 340],
-      spanGaps: false,
-    }, {
-      label: "GAD7 Scores",
-      fill:false,
-      lineTension:0.5,
-      backgroundColor: "red", 
-      borderColor: "orange", 
-      borderCapStyle: "butt",
-      borderDash: [],
-      borderDashOffset: 0.0,
-      borderJoinStyle: "miter",
-      pointBorderColor: "rgba(151,187,205,1)", 
-      pointBackgroundColor: "#fff",
-      pointBorderWidth: 1,
-      pointHoverRadius: 8,
-      pointHoverBackgroundColor: "#fff",
-      pointHoverBorderColor: "rgba(151,187,205,1)",
-      pointHoverBorderWidth: 2,
-      pointRadius: 4,
-      pointHitRadius: 10,
-      data: [200, 200, 200],
-      spanGaps: false,
-    }, {
-      label: "Sleep Questionnaire Scores",
-      fill:false,
-      lineTension:0.5,
-      backgroundColor: "red", 
-      borderColor: "orange", 
-      borderCapStyle: "butt",
-      borderDash: [],
-      borderDashOffset: 0.0,
-      borderJoinStyle: "miter",
-      pointBorderColor: "rgba(151,187,205,1)", 
-      pointBackgroundColor: "#fff",
-      pointBorderWidth: 1,
-      pointHoverRadius: 8,
-      pointHoverBackgroundColor: "#fff",
-      pointHoverBorderColor: "rgba(151,187,205,1)",
-      pointHoverBorderWidth: 2,
-      pointRadius: 4,
-      pointHitRadius: 10,
-      data: [100, 100, 100],
-      spanGaps: false,
-    }, {
-      label: "FitBit Data",
-      fill:false,
-      lineTension:0.5,
-      backgroundColor: "red", 
-      borderColor: "orange", 
-      borderCapStyle: "butt",
-      borderDash: [],
-      borderDashOffset: 0.0,
-      borderJoinStyle: "miter",
-      pointBorderColor: "rgba(151,187,205,1)", 
-      pointBackgroundColor: "#fff",
-      pointBorderWidth: 1,
-      pointHoverRadius: 8,
-      pointHoverBackgroundColor: "#fff",
-      pointHoverBorderColor: "rgba(151,187,205,1)",
-      pointHoverBorderWidth: 2,
-      pointRadius: 4,
-      pointHitRadius: 10,
-      data: [300, 300, 300],
-      spanGaps: false,
-    }
-    ]
-  };
 
   
 
-  const options = {
-    responsive: true,
-    scales: {
-      yAxes: [{
-        ticks: {
-          beginAtZero: true,
-          labelString: "Data"
-        },
-        scaleLabel: {
-          display: true,
-          labelString: "Scores",
-
-        }
-      }]
-      xAxes: [{
-        type: "time",
-        display: true,
-        scaleLabel: {
-          display:true,
-          labelString: "Date"
-        }
-      }]
-    }
-  }

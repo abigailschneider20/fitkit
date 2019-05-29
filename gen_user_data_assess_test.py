@@ -7,13 +7,13 @@ import random
 # depression: 0.08
 # insomnia: 0.25
 # populates table
-# also need a function to add data to table, maybe in actual server.py
 
 # """
 
 
 
 class Anxiety(object):
+    class_type = 'Anxiety'
     def __init__(self, user_id):
         self.user_id = user_id
         self.resting_hr = (random.randrange(65, 110))
@@ -23,6 +23,7 @@ class Anxiety(object):
         self.steps = (random.randrange(2000, 8000))
 
 class Depression(object):
+    class_type = 'Depression'
     def __init__(self, user_id):
         self.user_id = user_id
         self.resting_hr = (random.randrange(65, 110))
@@ -31,9 +32,8 @@ class Depression(object):
         self.mins_sedentary = (random.randrange(500, 750))
         self.steps = (random.randrange(2000, 8000))
 
-
-
 class Insomnia(object):
+    class_type = 'Insomnia'
     def __init__(self, user_id):
         self.user_id = user_id
         self.resting_hr = (random.randrange(65, 110))
@@ -42,8 +42,9 @@ class Insomnia(object):
         self.mins_sedentary = (random.randrange(500, 750))
         self.steps = (random.randrange(2000, 8000))
 
-class UnaffectedUser(object):
 
+class UnaffectedUser(object):
+    class_type = 'Unaffected'
     def __init__(self, user_id):
         self.user_id = user_id
         self.resting_hr = (random.randrange(50,100))
@@ -51,8 +52,7 @@ class UnaffectedUser(object):
         self.mins_exercise = (random.randrange(20, 300))
         self.mins_sedentary = (random.randrange(200, 600)) #avg. american sedentary for 4-6 hrs
         self.steps = (random.randrange(5000, 15000))
-
-
+        
 def generate_random(user_id):
     classes = (Anxiety, Depression, Insomnia, UnaffectedUser)
     probs = (0.18, 0.08, 0.25, 0.49)

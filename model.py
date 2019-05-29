@@ -25,6 +25,7 @@ class User(db.Model):
     age = db.Column(db.Integer, nullable = True)
     weight = db.Column(db.Integer, nullable = True)
     height = db.Column(db.Float, nullable = True)
+    class_type = db.Column(db.String(40), nullable = True)
     
 
     def __repr__(self):

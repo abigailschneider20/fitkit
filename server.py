@@ -5,7 +5,7 @@ import os
 from pprint import pformat
 import json
 import random
-from random_user import Anxiety, Depression, Insomnia, UnaffectedUser, assess_phq, assess_gad, assess_sleep
+from gen_user_data_assess_test import Anxiety, Depression, Insomnia, UnaffectedUser, assess_phq, assess_gad, assess_sleep
 import numpy
 from datetime import date, timedelta, datetime
 import requests
@@ -145,7 +145,6 @@ def download_fitbitdata(date1, date2):
         data = response.json()
         rendered_data = data[k]
         raw_data[k] = rendered_data
-
     return raw_data
 
 def create_newuser_data(date1, date2):
@@ -154,23 +153,21 @@ def create_newuser_data(date1, date2):
     classes = (Anxiety, Depression, Insomnia, UnaffectedUser)
     probs = (0.18, 0.08, 0.25, 0.49)
     existing_entry = DailyEntry.query.filter(DailyEntry.date == date1).first()
-    print(existing_entry)
-    print('there should be no entry yet')
     if existing_entry == None:
-        print('a new class should be printed')
         new_user_class= numpy.random.choice((classes), p=probs)
         print(new_user_class)
+        curr_user = User.query.filter(User.user_id == session['user_id']).first()
+        curr_user.class_type = new_user_class.class_type
         new_user = ""
         for i in range((date2-date1).days + 1):
             new_user_data = new_user_class(session['user_id'])
             new_user = DailyEntry(user_id = new_user_data.user_id, date = (date1 + timedelta(days=i)), steps = new_user_data.steps, sleep = new_user_data.mins_sleep, mins_sedentary = new_user_data.mins_sedentary, mins_exercise = new_user_data.mins_exercise, resting_hr = new_user_data.resting_hr)
             db.session.add(new_user)
             show_fitbit_data_lst.append(new_user)
-            print(new_user)
             db.session.commit()
     else:
         show_fitbit_data_lst.append(existing_entry)
-        print('this should not be printing out')
+
 
 
     return show_fitbit_data_lst
@@ -218,9 +215,7 @@ def fitbitdata():
     if date1 and date2:
         if session['user_id'] == 1:
             show_fitbit_data_lst = check_existing_entries(date1, date2)
-            print('this should not be printed')
         else:
-            print('this should be printed')
             show_fitbit_data_lst = create_newuser_data(date1, date2)
 
         return render_template('showfitbitdata.html', show_fitbit_data_lst = show_fitbit_data_lst)
@@ -233,6 +228,7 @@ def fitbitdata():
 def show_ehr_template():
     return render_template('ehrtemplate.html')
 
+
 @app.route('/chartdata.json')
 def chart_data():
     """Return biometric data and personal test
@@ -242,29 +238,47 @@ def chart_data():
      # able to see steps, sedentary mins, exercise, sleep; user.dailymetrics where type_id is 
      # for specific value and specific time.
     user = User.query.filter(User.user_id == session['user_id']).first()
+    print(user)
+    chart_type = request.args.get('chart_type')
+    print(chart_type)
     data_dict = {}
-    gad_dict = {}
-    for i in user.gad:
-        gad_dict[str(i.date)] = (int(i.score))
+    if chart_type == 'PHQ9':
+        for i in user.phq:
+            data_dict[str(i.date)] = (int(i.score))
 
-    sleep_dict = {}
-    for j in user.sleep:
-        sleep_dict[str(j.date)] = (int(j.score))
+    elif chart_type == 'GAD7':
+        for j in user.gad:
+            data_dict[str(j.date)] = (int(j.score))
 
-    metric_dict = {}
-    for k in user.dailymetrics:
-        metric_dict[str(k.date)] = ([k.steps, k.sleep, k.mins_sedentary, k.mins_exercise, k.resting_hr])
 
-    phq_dict = {}
-    for n in user.phq:
-        date = str(n.date.day)
-        phq_dict[(date)] = (int(n.score))
+    elif chart_type == 'Insomnia Index':
+        for k in user.sleep:
+            data_dict[str(k.date)] = (int(k.score))
 
-        data_dict = {
-        "labels": (list(phq_dict.keys())),
+    elif chart_type == 'Resting Heart Rate':
+        for m in user.dailymetrics:
+            data_dict[str(m.date)] = (m.resting_hr)
+    elif chart_type == 'Steps':
+        for n in user.dailymetrics:
+            data_dict[str(n.date)] = (n.steps)
+    elif chart_type == 'Mins Slept':
+        for r in user.dailymetrics:
+            data_dict[str(r.date)] = (r.sleep)
+    elif chart_type == 'Mins Exercise':
+        for x in user.dailymetrics:
+            data_dict[str(x.date)] = (x.mins_exercise)
+    else:
+        for y in user.dailymetrics:
+            data_dict[str(y.date)] = (y.mins_sedentary)
+    data_lst = sorted(data_dict.items())
+    date_labels = [x[0] for x in data_lst]
+    selected_data = [x[1] for x in data_lst]
+    data_dict = {
+        "labels": date_labels,
+
         "datasets": [
                 {
-                    "label": "PHQ Scores",
+                    "label": chart_type,
                     "fill": True,
                     "lineTension": 0.5,
                     "backgroundColor": "rgba(151,187,205,0.2)",
@@ -281,77 +295,16 @@ def chart_data():
                     "pointHoverBorderColor": "rgba(151,187,205,1)",
                     "pointHoverBorderWidth": 2,
                     "pointHitRadius": 10,
-                    "data": list(phq_dict.values()),
-                    "spanGaps": False},
-                {
-                    "label": "GAD Scores",
-                    "fill": True,
-                    "lineTension": 0.5,
-                    "backgroundColor": "rgba(151,187,205,0.2)",
-                    "borderColor": "rgba(151,187,205,1)",
-                    "borderCapStyle": 'butt',
-                    "borderDash": [],
-                    "borderDashOffset": 0.0,
-                    "borderJoinStyle": 'miter',
-                    "pointBorderColor": "rgba(151,187,205,1)",
-                    "pointBackgroundColor": "#fff",
-                    "pointBorderWidth": 1,
-                    "pointHoverRadius": 5,
-                    "pointHoverBackgroundColor": "#fff",
-                    "pointHoverBorderColor": "rgba(151,187,205,1)",
-                    "pointHoverBorderWidth": 2,
-                    "pointHitRadius": 10,
-                    "data": (list(gad_dict.values())),
-                    "spanGaps": False},
-                {
-                    "label": "Sleep Questionnaire Scores",
-                    "fill": True,
-                    "lineTension": 0.5,
-                    "backgroundColor": "rgba(151,187,205,0.2)",
-                    "borderColor": "rgba(151,187,205,1)",
-                    "borderCapStyle": 'butt',
-                    "borderDash": [],
-                    "borderDashOffset": 0.0,
-                    "borderJoinStyle": 'miter',
-                    "pointBorderColor": "rgba(151,187,205,1)",
-                    "pointBackgroundColor": "#fff",
-                    "pointBorderWidth": 1,
-                    "pointHoverRadius": 5,
-                    "pointHoverBackgroundColor": "#fff",
-                    "pointHoverBorderColor": "rgba(151,187,205,1)",
-                    "pointHoverBorderWidth": 2,
-                    "pointHitRadius": 10,
-                    "data": (list(sleep_dict.values())),
-                    "spanGaps": False},
-                            
-                {
-                    "label": "FitBit Data",
-                    "fill": True,
-                    "lineTension": 0.5,
-                    "backgroundColor": "rgba(151,187,205,0.2)",
-                    "borderColor": "rgba(151,187,205,1)",
-                    "borderCapStyle": 'butt',
-                    "borderDash": [],
-                    "borderDashOffset": 0.0,
-                    "borderJoinStyle": 'miter',
-                    "pointBorderColor": "rgba(151,187,205,1)",
-                    "pointBackgroundColor": "#fff",
-                    "pointBorderWidth": 1,
-                    "pointHoverRadius": 5,
-                    "pointHoverBackgroundColor": "#fff",
-                    "pointHoverBorderColor": "rgba(151,187,205,1)",
-                    "pointHoverBorderWidth": 2,
-                    "pointHitRadius": 10,
-                    "data": (list(metric_dict.values())),
+                    "data": selected_data,
                     "spanGaps": False}]
                     }
-      
-
+   
     return jsonify(data_dict)
 
 @app.route('/chart', methods = ['GET'])
 def show_chart():
     return render_template('chart.html')
+
 
 @app.route('/newtest', methods = ['GET'])
 def navigate_to_tests():
