@@ -229,7 +229,7 @@ def show_ehr_template():
     return render_template('ehrtemplate.html')
 
 
-@app.route('/chartdata.json')
+@app.route('/chartdata')
 def chart_data():
     """Return biometric data and personal test
      scores to be displayed on a chart"""
@@ -238,68 +238,63 @@ def chart_data():
      # able to see steps, sedentary mins, exercise, sleep; user.dailymetrics where type_id is 
      # for specific value and specific time.
     user = User.query.filter(User.user_id == session['user_id']).first()
-    print(user)
-    chart_type = request.args.get('chart_type')
-    print(chart_type)
+    firstchart_type = request.args.get('firstchart_type')
+    print(firstchart_type)
+    secchart_type = request.args.get('secchart_type')
+    print(secchart_type)
     data_dict = {}
-    if chart_type == 'PHQ9':
+    first_dict = {}
+    second_dict = {}
+
+    if firstchart_type == 'PHQ9':
         for i in user.phq:
-            data_dict[str(i.date)] = (int(i.score))
-
-    elif chart_type == 'GAD7':
-        for j in user.gad:
-            data_dict[str(j.date)] = (int(j.score))
-
-
-    elif chart_type == 'Insomnia Index':
-        for k in user.sleep:
-            data_dict[str(k.date)] = (int(k.score))
-
-    elif chart_type == 'Resting Heart Rate':
-        for m in user.dailymetrics:
-            data_dict[str(m.date)] = (m.resting_hr)
-    elif chart_type == 'Steps':
-        for n in user.dailymetrics:
-            data_dict[str(n.date)] = (n.steps)
-    elif chart_type == 'Mins Slept':
-        for r in user.dailymetrics:
-            data_dict[str(r.date)] = (r.sleep)
-    elif chart_type == 'Mins Exercise':
-        for x in user.dailymetrics:
-            data_dict[str(x.date)] = (x.mins_exercise)
+            first_dict[str(i.date)] = (int(i.score))
+    elif firstchart_type == 'GAD7':
+        for i in user.gad:
+            first_dict[str(i.date)] = (int(i.score))
     else:
-        for y in user.dailymetrics:
-            data_dict[str(y.date)] = (y.mins_sedentary)
-    data_lst = sorted(data_dict.items())
-    date_labels = [x[0] for x in data_lst]
-    selected_data = [x[1] for x in data_lst]
-    data_dict = {
-        "labels": date_labels,
+        for i in user.sleep:
+            first_dict[str(i.date)] = (int(i.score))
 
-        "datasets": [
-                {
-                    "label": chart_type,
-                    "fill": True,
-                    "lineTension": 0.5,
-                    "backgroundColor": "rgba(151,187,205,0.2)",
-                    "borderColor": "rgba(151,187,205,1)",
-                    "borderCapStyle": 'butt',
-                    "borderDash": [],
-                    "borderDashOffset": 0.0,
-                    "borderJoinStyle": 'miter',
-                    "pointBorderColor": "rgba(151,187,205,1)",
-                    "pointBackgroundColor": "#fff",
-                    "pointBorderWidth": 1,
-                    "pointHoverRadius": 5,
-                    "pointHoverBackgroundColor": "#fff",
-                    "pointHoverBorderColor": "rgba(151,187,205,1)",
-                    "pointHoverBorderWidth": 2,
-                    "pointHitRadius": 10,
-                    "data": selected_data,
-                    "spanGaps": False}]
-                    }
-   
-    return jsonify(data_dict)
+    if secchart_type =='Resting Heart Rate':
+        for j in user.dailymetrics:
+            second_dict[str(j.date)] = (int(j.resting_hr))
+    elif secchart_type == 'Steps':
+        for j in user.dailymetrics:
+            second_dict[str(j.date)] = (int(j.steps))
+    elif secchart_type == 'Mins Slept':
+        for j in user.dailymetrics:
+            second_dict[str(j.date)] = (int(j.sleep))
+    elif secchart_type == 'Mins Exercise':
+        for j in user.dailymetrics:
+            second_dict[str(j.date)] = (int(j.mins_exercise))
+    else:
+        for j in user.dailymetrics:
+            second_dict[str(j.date)] = (int(j.mins_sedentary))
+  
+    print(data_dict)
+    data_dict['data1'] = first_dict
+    data_dict['data2'] = second_dict
+    firstdata_lst = sorted(data_dict['data1'].items())
+    secdata_lst = sorted(data_dict['data2'].items())
+    print(firstdata_lst)
+    print(secdata_lst)
+    firstdate_labels = [x[0] for x in firstdata_lst]
+    secdate_labels = [x[0] for x in secdata_lst]
+    if len(firstdate_labels) > len(secdate_labels):
+        date_labels = firstdate_labels
+    elif len(secdate_labels) > len(firstdate_labels):
+        date_labels = secdate_labels
+    else: 
+        date_labels = []
+    first_data = [x[1] for x in firstdata_lst]
+    sec_data = [x[1] for x in secdata_lst]
+    labels = date_labels
+    data1 = first_data
+    data2 = sec_data
+
+    return render_template('chartdata.html', labels = labels, data1 = data1, data2 = data2)
+
 
 @app.route('/chart', methods = ['GET'])
 def show_chart():
@@ -325,9 +320,7 @@ def insert_answers_into_db():
         q8_answer = int(request.form.get('q8phq'))
         q9_answer = int(request.form.get('q9phq'))
         score = (q1_answer+q2_answer+q3_answer+q4_answer+q5_answer+q6_answer+q7_answer+q8_answer+q9_answer)
-        print(score)
         dep_severity = assess_phq(score)
-        print(dep_severity)
         new_test = PHQ(user_id = session['user_id'], date = date.today().strftime('%Y-%m-%d'), 
             q1_answer = q1_answer,
             q2_answer = q2_answer,
@@ -342,8 +335,8 @@ def insert_answers_into_db():
             dep_severity = dep_severity)
         db.session.add(new_test)
         db.session.commit()
-
-        flash('You successfully submitted your PHQ9 results.')
+        print(new_test.dep_severity)
+        flash('You successfully submitted your PHQ9 results. ')
         return redirect ('/user_profile')
     elif test_type == 'gad':
         q1_answer = int(request.form.get('q1gad'))

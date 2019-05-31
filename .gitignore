@@ -4,3 +4,11 @@ secrets.sh
 ratings/
 ratings/solution
 app-env.sh
+
+
+# To Do:
+# 1. React Dashboard --> components: graphs, recently imported data, user profile for updating stats, option to take a test
+# 2. Show/hide mental health tests when selected (JS)
+# # 3. Display overlaying graphs
+#         NONNUMERIC Y values for mental health test scores
+# 4. Explore weather API, possibly Google Maps
