@@ -5,7 +5,7 @@ import os
 from pprint import pformat
 import json
 import random
-from gen_user_data_assess_test import Anxiety, Depression, Insomnia, UnaffectedUser, assess_phq, assess_gad, assess_sleep
+from gen_user_data_assess_test import Anxiety, Depression, Insomnia, UnaffectedUser, assess_phq, assess_gad, assess_sleep, add_stats
 import numpy
 from datetime import date, timedelta, datetime
 import requests
@@ -147,27 +147,97 @@ def download_fitbitdata(date1, date2):
         raw_data[k] = rendered_data
     return raw_data
 
+def assess_new_testscores():
+    curr_user = User.query.filter(User.user_id == session['user_id']).first()
+    class_type = curr_user.class_type
+    if class_type == 'Depression':
+        incomplete_PHQ = PHQ.query.filter(PHQ.user_id == session['user_id'], PHQ.score == None).all()
+        for entry in incomplete_PHQ:
+            entry.score =(entry.q1_answer + entry.q2_answer + entry.q3_answer + entry.q4_answer + entry.q5_answer + entry.q6_answer + entry.q7_answer + entry.q8_answer + entry.q9_answer)
+            entry.dep_severity = assess_phq(entry.score)
+    elif class_type == 'Anxiety':
+        incomplete_GAD = GAD.query.filter(GAD.user_id == session['user_id'], GAD.score == None).all()
+        for entry in incomplete_GAD:
+            entry.score =(entry.q1_answer + entry.q2_answer + entry.q3_answer + entry.q4_answer + entry.q5_answer + entry.q6_answer + entry.q7_answer)
+            entry.anx_severity = assess_gad(entry.score)
+    elif class_type == 'Insomnia':
+        incomplete_ISI = Sleep.query.filter(Sleep.user_id == session['user_id'], Sleep.score == None).all()
+        for entry in incomplete_ISI:
+            entry.score =(entry.q1_answer + entry.q2_answer + entry.q3_answer + entry.q4_answer + entry.q5_answer + entry.q6_answer + entry.q7_answer)
+            entry.insomnia_severity = assess_sleep(entry.score)
+    elif class_type == 'Unaffected':
+        incomplete_PHQ = PHQ.query.filter(PHQ.user_id == session['user_id'], PHQ.score == None).all()
+        for entry in incomplete_PHQ:
+            entry.score =(entry.q1_answer + entry.q2_answer + entry.q3_answer + entry.q4_answer + entry.q5_answer + entry.q6_answer + entry.q7_answer + entry.q8_answer + entry.q9_answer)
+            entry.dep_severity = assess_phq(entry.score)
+        incomplete_GAD = GAD.query.filter(GAD.user_id == session['user_id'], GAD.score == None).all()
+        for entry in incomplete_GAD:
+            entry.score =(entry.q1_answer + entry.q2_answer + entry.q3_answer + entry.q4_answer + entry.q5_answer + entry.q6_answer + entry.q7_answer)
+            entry.anx_severity = assess_gad(entry.score)
+        incomplete_ISI = Sleep.query.filter(Sleep.user_id == session['user_id'], Sleep.score == None).all()
+        for entry in incomplete_ISI:
+            entry.score =(entry.q1_answer + entry.q2_answer + entry.q3_answer + entry.q4_answer + entry.q5_answer + entry.q6_answer + entry.q7_answer)
+            entry.insomnia_severity = assess_sleep(entry.score)
+    else:
+        return 'Error'
+    db.session.commit()
+
+def create_new_testscores(curr_user, new_user_data, date):
+    #creates new test scores for specified date range based off of user's class type (Depression, Anxiety, Insomnia, UnaffectedUser)
+    if curr_user.class_type == 'Depression':
+        new_PHQ = PHQ(user_id = session['user_id'], date = date, q1_answer = new_user_data.phq1, q2_answer = new_user_data.phq2, q3_answer = new_user_data.phq3, q4_answer = new_user_data.phq4, 
+                    q5_answer = new_user_data.phq5, q6_answer = new_user_data.phq6, q7_answer = new_user_data.phq7, q8_answer = new_user_data.phq8, q9_answer=new_user_data.phq9)
+        db.session.add(new_PHQ)
+        db.session.commit()
+        return new_PHQ
+    elif curr_user.class_type == 'Anxiety':
+        new_GAD = GAD(user_id = session['user_id'], date = date, q1_answer = new_user_data.gad1, q2_answer = new_user_data.gad2, q3_answer = new_user_data.gad3, q4_answer = new_user_data.gad4, 
+                    q5_answer = new_user_data.gad5, q6_answer = new_user_data.gad6, q7_answer = new_user_data.gad7)
+        db.session.add(new_GAD)
+        db.session.commit()
+        return new_GAD
+    elif curr_user.class_type == 'Insomnia':
+        new_ISI = Sleep(user_id = session['user_id'], date = date, q1_answer = new_user_data.isi1, q2_answer = new_user_data.isi2, q3_answer = new_user_data.isi3, q4_answer = new_user_data.isi4, 
+                    q5_answer = new_user_data.isi5, q6_answer = new_user_data.isi6, q7_answer = new_user_data.isi7)
+        db.session.add(new_ISI)
+        db.session.commit()
+        return new_ISI
+    else:
+        new_PHQ = PHQ(user_id = session['user_id'], date = date, q1_answer = new_user_data.phq1, q2_answer = new_user_data.phq2, q3_answer = new_user_data.phq3, q4_answer = new_user_data.phq4, 
+                    q5_answer = new_user_data.phq5, q6_answer = new_user_data.phq6, q7_answer = new_user_data.phq7, q8_answer = new_user_data.phq8, q9_answer=new_user_data.phq9)
+        new_GAD = GAD(user_id = session['user_id'], date = date, q1_answer = new_user_data.gad1, q2_answer = new_user_data.gad2, q3_answer = new_user_data.gad3, q4_answer = new_user_data.gad4, 
+                    q5_answer = new_user_data.gad5, q6_answer = new_user_data.gad6, q7_answer = new_user_data.gad7)
+        new_ISI = Sleep(user_id = session['user_id'], date = date, q1_answer = new_user_data.isi1, q2_answer = new_user_data.isi2, q3_answer = new_user_data.isi3, q4_answer = new_user_data.isi4, 
+                    q5_answer = new_user_data.isi5, q6_answer = new_user_data.isi6, q7_answer = new_user_data.isi7)
+        db.session.add(new_PHQ)
+        db.session.add(new_GAD)
+        db.session.add(new_ISI)
+        db.session.commit()
+        return new_PHQ, new_GAD, new_ISI
+
 def create_newuser_data(date1, date2):
     #creates new user data to mock import of FitBit data
     show_fitbit_data_lst = []
     classes = (Anxiety, Depression, Insomnia, UnaffectedUser)
     probs = (0.18, 0.08, 0.25, 0.49)
-    existing_entry = DailyEntry.query.filter(DailyEntry.date == date1).first()
+    existing_entry = DailyEntry.query.filter(DailyEntry.user_id == session['user_id'], DailyEntry.date == date1).first()
     if existing_entry == None:
         new_user_class= numpy.random.choice((classes), p=probs)
-        print(new_user_class)
         curr_user = User.query.filter(User.user_id == session['user_id']).first()
         curr_user.class_type = new_user_class.class_type
+        print(curr_user.class_type)
         new_user = ""
         for i in range((date2-date1).days + 1):
+            date = (date1+timedelta(days=i))
             new_user_data = new_user_class(session['user_id'])
-            new_user = DailyEntry(user_id = new_user_data.user_id, date = (date1 + timedelta(days=i)), steps = new_user_data.steps, sleep = new_user_data.mins_sleep, mins_sedentary = new_user_data.mins_sedentary, mins_exercise = new_user_data.mins_exercise, resting_hr = new_user_data.resting_hr)
-            db.session.add(new_user)
+            new_user = DailyEntry(user_id = new_user_data.user_id, date = date, steps = new_user_data.steps, sleep = new_user_data.mins_sleep, mins_sedentary = new_user_data.mins_sedentary, mins_exercise = new_user_data.mins_exercise, resting_hr = new_user_data.resting_hr)
             show_fitbit_data_lst.append(new_user)
-            db.session.commit()
+            new_scores = create_new_testscores(curr_user, new_user_data, date)
+            db.session.add(new_user)
+    
+        db.session.commit()
     else:
         show_fitbit_data_lst.append(existing_entry)
-
 
 
     return show_fitbit_data_lst
@@ -217,6 +287,7 @@ def fitbitdata():
             show_fitbit_data_lst = check_existing_entries(date1, date2)
         else:
             show_fitbit_data_lst = create_newuser_data(date1, date2)
+            assess_new_testscores()
 
         return render_template('showfitbitdata.html', show_fitbit_data_lst = show_fitbit_data_lst)
 
@@ -237,11 +308,15 @@ def chart_data():
      # Add date1 and date2 values to form. Use dates to query for data. FitBit data: be
      # able to see steps, sedentary mins, exercise, sleep; user.dailymetrics where type_id is 
      # for specific value and specific time.
+    
     user = User.query.filter(User.user_id == session['user_id']).first()
     firstchart_type = request.args.get('firstchart_type')
     print(firstchart_type)
     secchart_type = request.args.get('secchart_type')
     print(secchart_type)
+    formatType = request.args.get('format')
+    print(formatType)
+
     data_dict = {}
     first_dict = {}
     second_dict = {}
@@ -272,33 +347,47 @@ def chart_data():
         for j in user.dailymetrics:
             second_dict[str(j.date)] = (int(j.mins_sedentary))
   
-    print(data_dict)
     data_dict['data1'] = first_dict
     data_dict['data2'] = second_dict
-    firstdata_lst = sorted(data_dict['data1'].items())
     secdata_lst = sorted(data_dict['data2'].items())
+    date_labels = [x[0] for x in secdata_lst] #second dataset will always have more dates
+    for date in date_labels:
+        value = data_dict['data1'].get(date, None)
+        data_dict['data1'][date] = value
+    firstdata_lst = sorted(data_dict['data1'].items())
     print(firstdata_lst)
-    print(secdata_lst)
-    firstdate_labels = [x[0] for x in firstdata_lst]
-    secdate_labels = [x[0] for x in secdata_lst]
-    if len(firstdate_labels) > len(secdate_labels):
-        date_labels = firstdate_labels
-    elif len(secdate_labels) > len(firstdate_labels):
-        date_labels = secdate_labels
-    else: 
-        date_labels = []
     first_data = [x[1] for x in firstdata_lst]
     sec_data = [x[1] for x in secdata_lst]
-    labels = date_labels
-    data1 = first_data
-    data2 = sec_data
+    stats_dataone = [x for x in first_data if x != None]
+    stats_datatwo = [x for x in sec_data if x != None]
+    stats_dict = add_stats(stats_dataone, stats_datatwo)
+    print(stats_dict)
 
-    return render_template('chartdata.html', labels = labels, data1 = data1, data2 = data2)
+    if formatType == 'json':
+        return jsonify({
+            "labels": date_labels,
+            "datasets": [
+                {
+                    "label": firstchart_type,
+                    "data": first_data,
+                    "colorOpts": {}
+                },
+                {
+                    "label": secchart_type,
+                    "data": sec_data,
+                    "colorOpts": {                    
+              "backgroundColor": "rgb(232, 129, 109)",
+              "borderColor": "rgb(109, 232, 129)",
+              "pointHoverBackgroundColor": "rgb(150, 75, 220)",
+              "pointHoverBorderColor": "rgb(75, 218, 220)",
+            }
+                }
+            ]
+            })
 
 
-@app.route('/chart', methods = ['GET'])
-def show_chart():
-    return render_template('chart.html')
+    return render_template('chartdata.html', labels = date_labels, data1 = first_data, data2 = sec_data)
+
 
 
 @app.route('/newtest', methods = ['GET'])
