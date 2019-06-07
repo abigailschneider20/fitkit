@@ -11,7 +11,12 @@
 <ul> Patient is a __ year old __male who presents for ____. 
 
  
-
+<form action = '/predict' method = 'POST'>Input biometric data to be evaluated <br> <br>
+  <input type = 'text' id = "predictdata"> 
+  <input type = "submit" value = "Submit">
+</form>
+<div id = 'response'>
+  </div>
 </ul>
 </div>
   <span><h3> <form action = '/getfit' method = 'GET'> <a href = '/getfit'> Access more FitBit data</a></form> </h3>
@@ -19,6 +24,9 @@
   <h3> <form action = '/chart' method = 'GET'><a href = '/chart'> View Chart </a></form></h3>
   <h3><form action = '/ehrtemplate' method = 'GET'><a href = '/ehrtemplate'> Convert Data to EHR Template </a></span> <br> <br>
 
+<!-- <script>
+  $.post('predict', params = $(this).val(), (data)=> { $('#response').HTML(data); }
+</script> -->
 <footer>
     <div>
                   <form action = "/logout" method = "POST"> 

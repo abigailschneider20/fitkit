@@ -11,7 +11,6 @@ from datetime import date, timedelta, datetime
 import requests
 from flask import Flask, render_template, request, flash, redirect, session, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
-from sklearn.externals import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 import pickle
@@ -306,23 +305,30 @@ def show_ehr_template():
 
 @app.route('/predict', methods = ['POST'])
 def predict():
-    data = request.get_json(force=True)
-    phq_prediction = phq_model.predict([[numpy.array(data['resting_hr'])]])
-    phq_output = phq_prediction[0:4] #mean of all scores to generate y/n depression?
+    data = request.form.get('text')
+    print('this is YOUR DATA!!')
+    print(data)
+    data= [10000, 600, 150, 50]
+    #'steps', 'sleep', 'mins_exercise', 'mins_sedentary', 'resting_hr'
+    phq_prediction = phq_model.predict([[numpy.array(data)]])
+    print(phq_prediction)
+    phq_output = phq_prediction[0]
+    print(phq_output)
+    #mean of all scores to generate y/n depression?
     #what would be the key for data? multivariable input (resting heart rate, steps
     #sleep, mins_exercise, mins_sedentary) determining 0/not affected by Depression or 1/affected
-    gad_prediction = gad_model.predict([[numpy.array(data['resting_hr'])]])
-    gad_prediction = gad_model.predict([[numpy.array(data['steps'])]])
-    gad_prediction = gad_model.predict([[numpy.array(data['sleep'])]])
-    gad_prediction = gad_model.predict([[numpy.array(data['mins_exercise'])]])
-    gad_prediction = gad_model.predict([[numpy.array(data['mins_sedentary'])]])
-    gad_output = gad_prediction[0:4] 
-    #make dictionary of predictions or add to list and average?
-    isi_prediction = isi_model.predict([[numpy.array(data['resting_hr'])]])
-    isi_prediction = isi_model.predict([numpy.array(data['steps'])])
-    isi_prediction = isi_model.predict([numpy.array(data['sleep'])])
-    isi_prediction = isi_model.predict([numpy.array(data[])])
-    isi_output = isi_prediction[0]
+    # gad_prediction = gad_model.predict([[numpy.array(data['resting_hr'])]])
+    # gad_prediction = gad_model.predict([[numpy.array(data['steps'])]])
+    # gad_prediction = gad_model.predict([[numpy.array(data['sleep'])]])
+    # gad_prediction = gad_model.predict([[numpy.array(data['mins_exercise'])]])
+    # gad_prediction = gad_model.predict([[numpy.array(data['mins_sedentary'])]])
+    # gad_output = gad_prediction[0:4] 
+    # #make dictionary of predictions or add to list and average?
+    # isi_prediction = isi_model.predict([[numpy.array(data['resting_hr'])]])
+    # isi_prediction = isi_model.predict([numpy.array(data['steps'])])
+    # isi_prediction = isi_model.predict([numpy.array(data['sleep'])])
+    # isi_prediction = isi_model.predict([numpy.array(data['resting_hr'])])
+    # isi_output = isi_prediction[0]
 
     output = {'phq': phq_output,
                 'gad': gad_output,
@@ -512,9 +518,9 @@ def insert_answers_into_db():
         return redirect('/newtest')
 
 if __name__ == "__main__":
-    phq_model = pickle.load('modelphq.pkl', 'rb')
-    gad_model = pickle.load('modelgad.pkl', 'rb')
-    isi_model = pickle.load('modelisi.pkl', 'rb')
+    phq_model = pickle.load(open('modelphq.pkl', 'rb'))
+    gad_model = pickle.load(open('modelgad.pkl', 'rb'))
+    isi_model = pickle.load(open('modelisi.pkl', 'rb'))
     app.debug = True
     # make sure templates, etc. are not cached in debug mode
     app.jinja_env.auto_reload = app.debug
