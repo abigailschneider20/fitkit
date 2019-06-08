@@ -7,6 +7,24 @@
   crossorigin="anonymous"></script>
 <h2 class="form-signin-heading">Your FitBit Data</h2>
      <br><br>
+
+<div id = "showprediction">
+  <p> Based on your biometric data, 
+    {% if 1 in prediction.values() %}
+    you are <b>likely </b> to exhibit
+      {% if prediction['phq']==1 %}
+      <ul><b>Depression </b></ul>
+      {% endif %}
+      {% if prediction['gad']==1 %}
+      <ul><b> Anxiety </b></ul>
+      {% endif %}
+      {% if prediction['isi']==1 %}
+      <ul><b> Insomnia </b></ul>
+      {% endif %}
+    {% else %}
+    you are <b>unlikely </b>to exhibit Depression, Anxiety, or Insomnia. 
+    {% endif %}
+  </div>
 <div>
 <ul>{% for i in show_fitbit_data_lst %}
       <b>Date: {{i.date}}</b> <br>
@@ -20,10 +38,10 @@
 
 </ul>
 </div>
+
   <span><h3> <form action = '/getfit' method = 'GET'> <a href = '/getfit'> Access more FitBit data</a></form> </h3>
   <h3> <form action = '/newtest' method = 'GET'> <a href = '/newtest'> Take a new mental health test</a></form> </h3> 
-  <h3> <form action = '/chartdata' method = 'GET'><a href = '/chartdata'> View Chart </a></form></h3>
-  <h3><form action = '/ehrtemplate' method = 'GET'><a href = '/ehrtemplate'> Convert Data to EHR Template </a></span><br><br>
+  <h3> <form action = '/chartdata' method = 'GET'><a href = '/chartdata'> View Chart </a></form></h3></span>
 
 <footer>
     <div>
@@ -32,4 +50,7 @@
                  </form>
             </div>
         </footer>
+
+<script>
+</script>
 {% endblock %}

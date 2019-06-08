@@ -1,4 +1,4 @@
-user_id,score,user_id,date,steps,sleep,mins_sedentary,mins_exercise,resting_hr
+score,user_id,date,steps,sleep,mins_sedentary,mins_exercise,resting_hr
 1,0,1,2019-05-08,17042,444,661,143,57
 1,0,1,2019-05-09,14519,384,680,112,58
 1,0,1,2019-05-10,19261,430,606,154,57

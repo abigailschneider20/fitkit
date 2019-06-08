@@ -76,7 +76,7 @@ $(document).on('ready', () => {
     stacked: true,
     title: {
       display: true,
-      text: 'MultiAxis Chart'
+      text: 'Biometric Data vs. Mental Health Test Scores'
     },
     scales: {
       yAxes: [{
@@ -187,6 +187,13 @@ $(document).on('ready', () => {
 </div>
   <span><h3> <form action = '/getfit' method = 'GET'> <a href = '/getfit'> Access more FitBit data</a></form> </h3>
   <h3> <form action = '/newtest' method = 'GET'> <a href = '/newtest'> Take a new mental health test</a></form> </h3> 
-  <h3> <form action = '/chart' method = 'GET'><a href = '/chart'> View Chart </a></form></h3>
-  <h3><form action = '/ehrtemplate' method = 'GET'><a href = '/ehrtemplate'> Convert Data to EHR Template </a></span> <br> <br>
+  <h3> <form action = '/chartdata' method = 'GET'><a href = '/chartdata'> View Chart </a></form></h3></span>
+
+<footer>
+    <div>
+                  <form action = "/logout" method = "POST"> 
+                  <input type = "submit" value = "Log Out"> <!--    Show only when user is logged in using JS -->
+                 </form>
+            </div>
+        </footer>
 {% endblock %}

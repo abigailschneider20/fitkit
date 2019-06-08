@@ -289,11 +289,12 @@ def fitbitdata():
     if date1 and date2:
         if session['user_id'] == 1:
             show_fitbit_data_lst = check_existing_entries(date1, date2)
+            prediction=predict(date1, date2)
         else:
             show_fitbit_data_lst = create_newuser_data(date1, date2)
             assess_new_testscores()
-
-        return render_template('showfitbitdata.html', show_fitbit_data_lst = show_fitbit_data_lst)
+            prediction=predict(date1, date2)
+        return render_template('showfitbitdata.html', show_fitbit_data_lst = show_fitbit_data_lst, date1 = date1, date2=date2, prediction = prediction)
 
     else:
         flash('Please provide all of the required information')
@@ -303,37 +304,41 @@ def fitbitdata():
 def show_ehr_template():
     return render_template('ehrtemplate.html')
 
-@app.route('/predict', methods = ['POST'])
-def predict():
-    data = request.form.get('text')
-    print('this is YOUR DATA!!')
-    print(data)
-    data= [10000, 600, 150, 50]
-    #'steps', 'sleep', 'mins_exercise', 'mins_sedentary', 'resting_hr'
-    phq_prediction = phq_model.predict([[numpy.array(data)]])
-    print(phq_prediction)
+def predict(date1, date2):
+    #uses logistic regression models to predict mental health test scores based on biometric data
+    recent1 = DailyEntry.query.filter(DailyEntry.user_id == session['user_id'], DailyEntry.date>=date1).all()
+    recent2 = DailyEntry.query.filter(DailyEntry.user_id ==session['user_id'], DailyEntry.date<=date2).all()
+    recent_entries = set(recent1+recent2)
+    steps, sleep, mins_exercise, mins_sedentary, resting_hr = [], [], [], [], []
+    for entry in recent_entries:
+        steps.append(entry.steps)
+        sleep.append(entry.sleep)
+        mins_exercise.append(entry.mins_exercise)
+        mins_sedentary.append(entry.mins_sedentary)
+        resting_hr.append(entry.resting_hr)
+
+    steps = numpy.mean(steps)
+    sleep= numpy.mean(sleep)
+    mins_exercise = numpy.mean(mins_exercise)
+    mins_sedentary = numpy.mean(mins_sedentary)
+    resting_hr = numpy.mean(resting_hr)
+    print(steps, sleep, mins_sedentary, mins_exercise, resting_hr)
+    user_id = session['user_id']
+    data = [user_id, user_id, steps, sleep, mins_sedentary, mins_exercise, resting_hr]
+    phq_prediction = phq_model.predict([data])
     phq_output = phq_prediction[0]
     print(phq_output)
-    #mean of all scores to generate y/n depression?
-    #what would be the key for data? multivariable input (resting heart rate, steps
-    #sleep, mins_exercise, mins_sedentary) determining 0/not affected by Depression or 1/affected
-    # gad_prediction = gad_model.predict([[numpy.array(data['resting_hr'])]])
-    # gad_prediction = gad_model.predict([[numpy.array(data['steps'])]])
-    # gad_prediction = gad_model.predict([[numpy.array(data['sleep'])]])
-    # gad_prediction = gad_model.predict([[numpy.array(data['mins_exercise'])]])
-    # gad_prediction = gad_model.predict([[numpy.array(data['mins_sedentary'])]])
-    # gad_output = gad_prediction[0:4] 
-    # #make dictionary of predictions or add to list and average?
-    # isi_prediction = isi_model.predict([[numpy.array(data['resting_hr'])]])
-    # isi_prediction = isi_model.predict([numpy.array(data['steps'])])
-    # isi_prediction = isi_model.predict([numpy.array(data['sleep'])])
-    # isi_prediction = isi_model.predict([numpy.array(data['resting_hr'])])
-    # isi_output = isi_prediction[0]
+    gad_prediction = gad_model.predict([data])
+    gad_output = gad_prediction[0]
+    print(gad_output)
+    isi_prediction= isi_model.predict([data])
+    isi_output = isi_prediction[0]
+    print(isi_output)
 
-    output = {'phq': phq_output,
+    prediction = {'phq': phq_output,
                 'gad': gad_output,
                 'isi': isi_output}
-    return jsonify(output)
+    return prediction
 
 
 @app.route('/chartdata')
@@ -347,11 +352,8 @@ def chart_data():
     
     user = User.query.filter(User.user_id == session['user_id']).first()
     firstchart_type = request.args.get('firstchart_type')
-    print(firstchart_type)
     secchart_type = request.args.get('secchart_type')
-    print(secchart_type)
     formatType = request.args.get('format')
-    print(formatType)
 
     data_dict = {}
     first_dict = {}
@@ -396,8 +398,6 @@ def chart_data():
     sec_data = [x[1] for x in secdata_lst]
     stats_dataone = [x for x in first_data if x != None]
     stats_datatwo = [x for x in sec_data if x != None]
-    stats_dict = add_stats(stats_dataone, stats_datatwo)
-    print(stats_dict)
 
     if formatType == 'json':
         return jsonify({
@@ -518,9 +518,9 @@ def insert_answers_into_db():
         return redirect('/newtest')
 
 if __name__ == "__main__":
-    phq_model = pickle.load(open('modelphq.pkl', 'rb'))
-    gad_model = pickle.load(open('modelgad.pkl', 'rb'))
-    isi_model = pickle.load(open('modelisi.pkl', 'rb'))
+    phq_model = pickle.load(open('phq.pkl', 'rb'))
+    gad_model = pickle.load(open('gad.pkl', 'rb'))
+    isi_model = pickle.load(open('isi.pkl', 'rb'))
     app.debug = True
     # make sure templates, etc. are not cached in debug mode
     app.jinja_env.auto_reload = app.debug
