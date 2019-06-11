@@ -24,6 +24,15 @@
     {% else %}
     you are <b>unlikely </b>to exhibit Depression, Anxiety, or Insomnia. 
     {% endif %}
+    <span>Based on your data, it is recommended that you:
+    {% if prediction['recs'] %}
+      {% for rec in prediction['recs'] %}
+        <li>{{rec}} </li>
+      {% endfor %}
+    {% else %}
+    Maintain your current level of physical fitness. <br>
+    {% endif %} <br>
+  </span>
   </div>
 <div>
 <ul>{% for i in show_fitbit_data_lst %}

@@ -323,6 +323,15 @@ def predict(date1, date2):
     mins_sedentary = numpy.mean(mins_sedentary)
     resting_hr = numpy.mean(resting_hr)
     print(steps, sleep, mins_sedentary, mins_exercise, resting_hr)
+    recs = []
+    if steps < 10000:
+        recs.append(f'Try walking {int(10000-steps)} more steps daily')
+    if sleep < 420:
+        recs.append(f'Try going to sleep {int(420-sleep)} minutes earlier each night')
+    if mins_exercise < 40:
+        recs.append(f'Try adding in {int(40-mins_exercise)} more minutes of exercise daily')
+    if resting_hr > 100:
+        recs.append(f'Consider speaking to your doctor about your elevated resting heart rate and ways to improve your overall cardiovascuclar health')
     user_id = session['user_id']
     data = [user_id, user_id, steps, sleep, mins_sedentary, mins_exercise, resting_hr]
     phq_prediction = phq_model.predict([data])
@@ -337,7 +346,8 @@ def predict(date1, date2):
 
     prediction = {'phq': phq_output,
                 'gad': gad_output,
-                'isi': isi_output}
+                'isi': isi_output, 
+                'recs': recs}
     return prediction
 
 
@@ -345,10 +355,6 @@ def predict(date1, date2):
 def chart_data():
     """Return biometric data and personal test
      scores to be displayed on a chart"""
-     # user.phq.score = data for line graph but only for specific user and time specified. 
-     # Add date1 and date2 values to form. Use dates to query for data. FitBit data: be
-     # able to see steps, sedentary mins, exercise, sleep; user.dailymetrics where type_id is 
-     # for specific value and specific time.
     
     user = User.query.filter(User.user_id == session['user_id']).first()
     firstchart_type = request.args.get('firstchart_type')
@@ -393,11 +399,11 @@ def chart_data():
         value = data_dict['data1'].get(date, None)
         data_dict['data1'][date] = value
     firstdata_lst = sorted(data_dict['data1'].items())
-    print(firstdata_lst)
     first_data = [x[1] for x in firstdata_lst]
     sec_data = [x[1] for x in secdata_lst]
-    stats_dataone = [x for x in first_data if x != None]
-    stats_datatwo = [x for x in sec_data if x != None]
+    stats1 = [x for x in first_data if x != None]
+    stats2 = [x for x in sec_data if x != None]
+    stats = add_stats(stats1, stats2)
 
     if formatType == 'json':
         return jsonify({
@@ -418,11 +424,12 @@ def chart_data():
               "pointHoverBorderColor": "rgb(75, 218, 220)",
             }
                 }
-            ]
+            ],
+            "stats":stats
             })
 
 
-    return render_template('chartdata.html', labels = date_labels, data1 = first_data, data2 = sec_data)
+    return render_template('chartdata.html', labels = date_labels, data1 = first_data, data2 = sec_data, stats = stats)
 
 
 

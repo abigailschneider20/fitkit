@@ -15,16 +15,25 @@
   <input type ="radio" class = "chart" name = "secchart_type" value = "Mins Slept" required> Mins Slept <br>
   <input type = "radio" class = "chart" name = "secchart_type" value = "Mins Exercise" required> Mins Exercise <br>
   <input type = "radio" class = "chart" name = "secchart_type" value = "Mins Sedentary" required> Mins Sedentary <br>
-     <button type="submit">Submit 
+     <button id = "submitbutton" type="submit">Submit 
         </button>
   </form>
+</ul>
+</div>
 
-  Insert Chart here:
-  <div class = 'lineChart'>
-  <canvas id='lineChart'></canvas>
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+
+          <canvas id='lineChart'></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-<div class = 'legend'> <canvas id='legend'></canvas>
-</div>
+
 
 <script>
 "use strict";
@@ -64,10 +73,13 @@ function createDataset(label, data, colorOpts = {}) {
     };
 }
 
+
 $(document).on('ready', () => {
 
-  const ctx = $('#lineChart').get(0).getContext('2d');
+  console.log('hi');
 
+  const ctx = $('#lineChart').get(0).getContext('2d');
+  console.log(ctx);
   
 
   const options = {
@@ -113,12 +125,11 @@ $(document).on('ready', () => {
         ),
       createDataset(
         'FitBitData',
-        {{ data2|tojson }},
+        {{ data2|tojson }}
        
-        ),
+        )
     ]
   };
-  console.log(data);
 
   const fitbitLineChart = new Chart(
     ctx,
@@ -146,6 +157,8 @@ $(document).on('ready', () => {
     $.get('/chartdata', formData, (data)=> {
       const lengthLabel = fitbitLineChart.data.labels.length;
       const lengthDataset = fitbitLineChart.data.datasets.length;
+      $('.legend').html(data.stats);
+      console.log(data.stats);
 
       for (let i = 0; i<lengthLabel; i++) {
         fitbitLineChart.data.labels.pop();
@@ -167,6 +180,8 @@ $(document).on('ready', () => {
 
         fitbitLineChart.data.datasets.push(newConfig);
       }
+
+
 
       fitbitLineChart.update();
     });

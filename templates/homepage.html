@@ -1,27 +1,63 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<!--     <link rel="stylesheet"
-          href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.css"/> -->
 
-<body>
-    <title>Welcome to FitKit</title>
 
-    <h1> Welcome to FitKit </h1>
-        <h2>Your First Step to a Fitter You: Physically AND Mentally </h2>
 
-        <div class="navbar navbar-inverse navbar-static-top">
+<header>
+
+            <div id="carousel" class="carousel slide" data-ride="carousel">
+                <ol class="carousel-indicators">
+                    <li data-target="#carousel" data-slide-to="0" class="active"></li>
+                    <li data-target="#carousel" data-slide-to="1"></li>
+                    <li data-target="#carousel" data-slide-to="2"></li>
+                </ol>
+                <div class="carousel-inner" role="listbox">
+                    <div class="carousel-item active" style ="background-image: url('static/blue-runner.jpg')">
+                        <div class="carousel-caption d-none d-md-block">
+                            <h2 class="display-4"> Step up your fitness</h2>
+                            <p class="lead">FitKit can help you better understand your current physical health, correlate biometric markers with mental health benchmarks, and help you take control of your health. </p>
+                        </div>
+                    </div>
+
+                    <div class="carousel-item" style="background-image: url('static/food.jpg')">
+                        <div class = "carousel-caption d-none d-md-block">
+                            <h2 class="display-4"> Learn how to live healthier </h2>
+                            <p class="lead"> FitKit offers a BMI calculator and several tools to help you reach and maintain a healthy weight. </p>
+                        </div>
+                    </div>
+
+                    <div class="carousel-item" style="background-image: url('static/meditation.jpg')">
+                        <div class="carousel-caption d-none d-md-block">
+                            <h2 class="display-4">Improve your mental health </h2>
+                            <p class="lead"> FitKit provides unique insight into how your everyday habits are influencing your mental health status. </p>
+                        </div>
+                    </div>
+                    <div class="carousel-item" style="background-image: url('static/pug2.jpg')">
+                        <div class="carousel-caption d-none d-md-block">
+                            <h2 class="display-4"> Sleep better</h2>
+                            <p class="lead"> FitKit allows you to delve deep into your sleeping habits and identify room for improvement. </p>
+                        </div>
+                    </div>
+                </div>
+                <a class= "carousel-control-prev" href="#carousel" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous </span>
+                </a>
+                <a class="carousel-control-next" href="#carousel" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only"> Next </span>
+                </a>
+            </div>
+        </header>
+
+    <section class="py-5">
         <div class="container">
-
-            <div class="navbar-header">
-                <a class="navbar-brand" href="/">FitKit</a>
-            </div>
-
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav navbar-right"></ul>
-            </div>
-
+            <h1 class="display-4"> Create a FitKit account today and see what FitKit can offer you!  </h1>
+            <p class ="lead">  </p> FitKit is a comprehensive, personalized health tool that can help you achieve your optimal physical and mental health. We provide revolutionary insights into your current health and allow you the opportunity to see how your physical health affects and is affected by your mental health.
+        </div>
+    </section>
         </div>
     </div>
-</body>
+
 {% endblock %}

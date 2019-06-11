@@ -7,25 +7,22 @@
 <h2 class="form-signin-heading">Take a New Test</h2>
     <form action="/newtest" method="POST">
 
-       <!-- insert calendar plugin function to get date1 and date2, unless only specify today -->
-    <!--    Find how to get data and input into db
-    Implement javascript to show/hide forms that have/have not been selected to be taken
- -->
-       <select name = "testtype"> Select which test you would like to take:
+
+       <select name = "testtype" id = "testtype"> Select which test you would like to take:
         <option> Select </option>
         <option value = "phq"> Patient Health Questionnaire (PHQ9: to assess degree of depression severity) </option>
         <option value = "gad"> Generalized Anxiety Disorder (GAD7: to assess degree of anxiety severity) </option>
-        <option value = "sleep"> Sleep Questionnaire (To assess degree of insomnia severity) </option>
+        <option value = "isi"> Sleep Questionnaire (To assess degree of insomnia severity) </option>
 
       </select>
 
 <!--       on submit, show/hide form selected to allow for completion of test. -->
-
+<div id = 'gad'>
     <h3> Generalized Anxiety Disorder Evaluation (GAD7) </h3>
     <h4> A seven question test designed to assess the degree of anxiety severity. </h4>
   <h5> How often have you been bothered by the following over the past two weeks? </h5>
     <body>
-      <div>
+
         Question 1: Feeling nervous, anxious, or on edge? <br> 
         <input type = "radio" name = "q1gad" value = "0"> Not at All <br>
         <input type = "radio" name = "q1gad" value = "1"> Several days <br>
@@ -70,12 +67,11 @@
         </button>
 
       </div>
-
+<div id = 'phq'>
     <h3> Patient Health Questionnaire (PHQ9) </h3>
     <h4> A nine question test designed to assess the degree of depression severity. </h4>
   <h5> How often have you been bothered by the following over the past two weeks? </h5>
     <body>
-      <div>
         Question 1: Little interest or pleasure in doing things? <br> 
         <input type = "radio" name = "q1phq" value = "0"> Not at All <br>
         <input type = "radio" name = "q1phq" value = "1"> Several days <br>
@@ -132,11 +128,11 @@
         </button>
     </div>
 
+<div id = 'isi'>
     <h3> Sleep Questionnaire (Insomnia Severity Index) </h3>
     <h4> A seven question test designed to assess the degree of insomnia severity. </h4>
   <h5> Please rate the current (i.e. last two weeks) severity of your sleep problem(s). </h5>
     <body>
-      <div>
         Question 1: Difficulty falling asleep <br> 
         <input type = "radio" name = "q1" value = "0"> None/Not at All <br>
         <input type = "radio" name = "q1" value = "1"> Mild/Several days <br>
@@ -191,6 +187,7 @@
       </body>
     </form>
 <footer>
+
     <div>
                   <form action = "/logout" method = "POST"> 
                   <input type = "submit" value = "Log Out"> <!--    Show only when user is logged in using JS -->
@@ -201,26 +198,35 @@
 <script src="https://code.jquery.com/jquery-3.4.1.js"
   integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
   crossorigin="anonymous"></script>
-<script type = "text/javascript">
-    $('event.target').change(function(){
-        if ($(this).val() == "phq"){
-            $('.phqform').show();
-            $('.gadform').hide();
-            $('.sleepform').hide();
-        } else if ($(this).val()== "gad"){
-            $('.gadform').show();
-            $('.sleepform').hide();
-            $('.phqform').hide();
-        } else if ($(this).val() == "sleep"){
-            $('.sleepform').show();
-            $('.gadform').hide();
-            $('.phqform').hide();
-        } else {
-            $('.sleepform').hide();
-            $('.phqform').hide();
-            $('.gadform').hide();
-        }
-    });
+<script>
+
+$(function(){
+    $('#phq').hide();
+    $('#gad').hide();
+    $('#isi').hide();
+})
+$('#testtype').bind('change', function(evt){
+    let i = $('#testtype').val();
+     if (i == 'phq')
+    {
+        $('#phq').show();
+        $('#gad').hide();
+        $('#isi').hide();
+    }
+    else if (i == 'gad')
+    {
+        $('#gad').show();
+        $('#phq').hide();
+        $('#isi').hide();
+    }
+    else if (i == 'isi')
+    {
+        $('#isi').show();
+        $('#gad').hide();
+        $('#phq').hide();
+    }
+
+});
 </script>
 
 {% endblock %}

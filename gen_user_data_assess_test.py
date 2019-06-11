@@ -159,15 +159,15 @@ def add_stats(data1, data2):
     test_std = np.std(test_score_array)
     fit_std = np.std(fit_score_array)
     stats_dict = {'test':{
-                'mean': test_mean,
-                'median': test_median,
-                'range': test_range,
-                'std': test_std}, 
+                'mean': int(test_mean),
+                'median': int(test_median),
+                'range': int(test_range),
+                'std': int(test_std)}, 
                 'fit':{
-                'mean': fit_mean,
-                'median': fit_median,
-                'range': fit_range,
-                'std': fit_std
+                'mean': int(fit_mean),
+                'median': int(fit_median),
+                'range': int(fit_range),
+                'std': int(fit_std)
                 }}
     return stats_dict
     
