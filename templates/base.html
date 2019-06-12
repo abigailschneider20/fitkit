@@ -1,34 +1,29 @@
 <html>
 <head>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-   <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
+<link href="https://fonts.googleapis.com/css?family=Martel:200,900&display=swap" rel="stylesheet">
 
-     <link href="https://fonts.googleapis.com/css?family=Martel:200,900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+<script src="https://code.jquery.com/jquery.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
-  <script
-  src="https://code.jquery.com/jquery-3.4.1.js"
-  integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
-  crossorigin="anonymous"></script> 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-  <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js"></script>
 
-    <style> 
-
+<style> 
       body {
       font-family: 'Martel', serif;
       padding-top: 250px;
-      text-align: center;
       }
+
       .navbar-brand {
         font-family: 'Martel', serif
         font-weight: 800;
         font-size: 50px;
         margin: 0 auto;
-
       }
       .carousel-item {
-          height: 100vh;
+          height: 70vh;
           min-height: 350px;
           background: no-repeat center center scroll;
           -webkit-background-size: cover;
@@ -38,7 +33,6 @@
         }
         .nav-link{
             font-size:15px;
-
         }
  
         #fit-img {
@@ -46,21 +40,22 @@
             padding-left:0;
             max-width:100%;
         }
-    </style>
-            <nav class = "navbar navbar-expand-lg navbar-light bg-light fixed-top">
-                <div class = "container-fluid">
-                    <img class = "fit-img" src="static/fit.png"  alt="FitKit logo">
-                    <a class = "navbar-brand" href="/"> FitKit </a>
+</style>
 
-                    <button class = "navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+  <nav class = "navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <div class = "container-fluid">
+        <img class = "img-responsive" id='fit-img' src="static/fit.png"  alt="FitKit logo">
+            <a class = "navbar-brand" href="/"> FitKit </a>
+
+              <button class = "navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
                     aria-controls="navbarResponsive" aria-label="Toggle navigation">
                     <span class = "navbar-toggler-icon"></span>
                 </button>
-                <div class = "collapse-navbar-collapse" id="navbarResponsive">
-                    <ul class ="navbar-nav ml-auto">
-                        <li class="navbar-item active">
-                            <a class= "nav-link" href='/login'> Login
-                                <span class ="sr-only">(current)</span>
+            <div class = "collapse-navbar-collapse" id="navbarResponsive">
+                <ul class ="navbar-nav ml-auto">
+                    <li class="navbar-item active">
+                        <a class= "nav-link" href='/login' id="login"> Login
+                          <span class ="sr-only">(current)</span>
                             </a>
                         </li>
                         <li class = "nav-item">
@@ -76,14 +71,18 @@
                 </div>
             </div>
         </nav>
+</head>
+<body>
+<div class="container">
 
-
+  <!-- Show flashed messages -->
   {% with messages = get_flashed_messages() %}
       {% for message in messages %}
           <div class="alert alert-warning">{{ message }}</div>
       {% endfor %}
   {% endwith %}
 
+  <!-- This is where the main content goes. -->
   {% block body %}
       
   {% endblock %}
@@ -91,4 +90,5 @@
 </div>
 
 </body>
+
 </html>

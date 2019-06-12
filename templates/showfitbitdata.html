@@ -1,61 +1,80 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<script
-  src="https://code.jquery.com/jquery-3.4.1.js"
-  integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
-  crossorigin="anonymous"></script>
-<h2 class="form-signin-heading">Your FitBit Data</h2>
-     <br><br>
 
-<div id = "showprediction">
-  <p> Based on your biometric data, 
-    {% if 1 in prediction.values() %}
-    you are <b>likely </b> to exhibit
-      {% if prediction['phq']==1 %}
-      <ul><b>Depression </b></ul>
-      {% endif %}
-      {% if prediction['gad']==1 %}
-      <ul><b> Anxiety </b></ul>
-      {% endif %}
-      {% if prediction['isi']==1 %}
-      <ul><b> Insomnia </b></ul>
-      {% endif %}
-    {% else %}
-    you are <b>unlikely </b>to exhibit Depression, Anxiety, or Insomnia. 
-    {% endif %}
-    <span>Based on your data, it is recommended that you:
-    {% if prediction['recs'] %}
-      {% for rec in prediction['recs'] %}
-        <li>{{rec}} </li>
-      {% endfor %}
-    {% else %}
-    Maintain your current level of physical fitness. <br>
-    {% endif %} <br>
-  </span>
-  </div>
-<div>
-<ul>{% for i in show_fitbit_data_lst %}
-      <b>Date: {{i.date}}</b> <br>
-      Steps: {{i.steps}}  <br>
-      Sleep: {{i.sleep}} <br>
-      Sedentary Minutes: {{i.mins_sedentary}}<br>
-      Active Minutes: {{i.mins_exercise}} <br>
-      Resting Heart Rate: {{i.resting_hr}} <br>
+<style>
+  .card {
+    text-align: center;
+    background-color:#E9E9E9;
+    border-color:#99D3DF;
+    border-width:10px;
+    margin:0 auto;
+    float:none;
+    margin-bottom:10px;
+  }
+  #fitcard {
+    display:inline-block;
+    border-width:2px;
+    margin: 0 auto;
+    float:none;
+    margin-bottom:10px;
+  }
+</style>
+<div class="card border-#99D3DF mb-3" style="max-width:50rem;" id="showprediction">
+  <div class="card-header">Interpretations of your FitBit Data</div>
+    <div class="card-body">
+        <h5 class="card-title"> Based on your biometric data, </h5>
+          <p class="card-text">
+          {% if 1 in prediction.values() %}
+          You are <b> likely </b> to exhibit symptoms of
+          {% if prediction['phq']==1 %}
+          <ul><b>Depression</b></ul>
+          {% endif %}
+          {% if prediction['gad']==1 %}
+          <ul><b>Anxiety</b></ul>
+          {% endif %}
+          {% if prediction['isi']==1 %}
+          <ul><b>Insomnia</b></ul>
+          {% endif %}
+        {% else %}
+        you are <b> unlikely </b> to exhibit signs of Depression, Anxiety, or Insomnia. 
+        {% endif %}
+          It is recommended that you: <br>
+          {% if prediction['recs'] %}
+            {% for rec in prediction['recs'] %}
+              <li class="pull-left">{{rec}}</li>
+              {% endfor %}
+            {% else %}
+            Maintain your current level of physical fitness.
+            {% endif %} <br>
+    
+      </div>
+    </div>
+
+{% for i in show_fitbit_data_lst %}
+  <div class="card border-light mb-3" id="fitcard" style="max-width:18rem;">
+      <p class="card-text">
+        <b>Date: {{i.date}}</b> <br>
+        Steps: {{i.steps}}  <br>
+        Sleep: {{i.sleep}} <br>
+        Sedentary Minutes: {{i.mins_sedentary}}<br>
+        Active Minutes: {{i.mins_exercise}} <br>
+        Resting Heart Rate: {{i.resting_hr}} <br></p>
+      </div>
  
   {% endfor %}
-
+<br>
 </ul>
 </div>
 
-  <span><h3> <form action = '/getfit' method = 'GET'> <a href = '/getfit'> Access more FitBit data</a></form> </h3>
-  <h3> <form action = '/newtest' method = 'GET'> <a href = '/newtest'> Take a new mental health test</a></form> </h3> 
-  <h3> <form action = '/chartdata' method = 'GET'><a href = '/chartdata'> View Chart </a></form></h3></span>
+  <h4><form action = '/getfit' method = 'GET'> <a href = '/getfit' class="btn btn-info" role="button" style="float:right;"> Access more FitBit data</a></form> </h4><br>
+  <h4> <form action = '/newtest' method = 'GET'> <a href = '/newtest' class="btn btn-info" role="button" style="float:right;"> Take a new mental health test</a></form></h4><br>
+  <h4> <form action = '/chartdata' method = 'GET'><a href = '/chartdata' class="btn btn-info" role="button" style="float:right;"> View Chart </a></form></h4><br>
 
 <footer>
-    <div>
+    <div> <br><br>
                   <form action = "/logout" method = "POST"> 
-                  <input type = "submit" value = "Log Out"> <!--    Show only when user is logged in using JS -->
+                  <input type = "submit" class="btn btn-light"value = "Log Out"> <!--    Show only when user is logged in using JS -->
                  </form>
             </div>
         </footer>

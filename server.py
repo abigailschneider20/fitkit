@@ -38,28 +38,35 @@ def index():
 @app.route('/register', methods = ['GET'])
 def register_form():
     """Register new users"""
+    if session.get('user_id') !=None:
+        flash('You have already logged in.')
+        return redirect('/dashboard')
     return render_template('register.html')
 
 @app.route('/register', methods = ['POST'])
 def process_registration():
     """Process new user registration"""
-    email = request.form.get('email')
-    password = request.form.get('password')
-    f_name = request.form.get('f_name')
-    l_name = request.form.get('l_name')
-    age = request.form.get('age')
-    sex = request.form.get('sex')
+    if session.get('user_id') != None:
+        flash('You have already logged in.')
+        return redirect('/dashboard')
+    else:
+        email = request.form.get('email')
+        password = request.form.get('password')
+        f_name = request.form.get('f_name')
+        l_name = request.form.get('l_name')
+        age = request.form.get('age')
+        sex = request.form.get('sex')
 
-    new_user = User(email = email, password = password, f_name = f_name,
-        l_name = l_name, age = age, sex = sex)
-    db.session.add(new_user)
-    db.session.commit()
-    session['user_id'] = new_user.user_id
+        new_user = User(email = email, password = password, f_name = f_name,
+            l_name = l_name, age = age, sex = sex)
+        db.session.add(new_user)
+        db.session.commit()
+        session['user_id'] = new_user.user_id
 
 
-    flash('Welcome!')
+        flash('Welcome!')
 
-    return render_template('/hipaa.html')
+        return render_template('/hipaa.html')
 
 @app.route('/hipaa', methods = ['POST'])
 def hipaa_form():
@@ -68,7 +75,7 @@ def hipaa_form():
         user = User.query.filter(User.user_id == session['user_id']).first()
         user.has_signed_hipaa = True
         db.session.commit()
-        return redirect('/user_profile')
+        return redirect('/dashboard')
     else:
         flash('You must acknowledge HIPAA Privacy Practices.')
         return render_template('/hipaa.html')
@@ -78,6 +85,9 @@ def hipaa_form():
 @app.route('/login', methods = ['GET'])
 def login_form():
     """Sends user to login form to fill out"""
+    if session.get('user_id') != None:
+        flash('You have already logged in.')
+        return redirect('/dashboard')
     return render_template('login.html')
 
 @app.route('/login', methods = ['POST'])
@@ -100,7 +110,7 @@ def login():
     session["user_id"] = user.user_id
 
     flash("Logged in")
-    return render_template('user_profile.html', user = user)
+    return render_template('dashboard.html', user = user)
 
 @app.route('/logout', methods = ['POST'])
 def logout():
@@ -113,12 +123,25 @@ def logout():
     else:
         flash('You have already logged out.')
 
-@app.route('/user_profile')
-def user_profile():
-    """Shows user profile for signed in user"""
-    user_id = session.get('user_id')
-    user = User.query.options(db.joinedload('dailymetrics')).get(user_id)
-    return render_template("user_profile.html", user=user)
+@app.route('/dashboard')
+def dashboard():
+    """Shows user dashboard for signed in user"""
+    if session.get('user_id') != None:
+        user_id = session.get('user_id')
+        user = User.query.options(db.joinedload('dailymetrics')).get(user_id)
+        return render_template("dashboard.html", user=user)
+    else:
+        flash('You must log in in order to view your dashboard.')
+        return redirect ('/login')
+
+@app.route('/profile')
+def show_user_profile():
+    if session.get('user_id') != None:
+        user=User.query.filter_by(user_id=session['user_id']).one()
+        return render_template("user_profile.html", user=user)
+    else:
+        flash('You must log in in order to view your profile.')
+        return redirect('/login')
 
 @app.route('/getfit')
 def show_fitbit_form():
@@ -127,7 +150,11 @@ def show_fitbit_form():
     For other users, new data will be randomly assigned based on incidences of 
     various mental health conditions and the data will be instantiated for each
     of the days specified in the desired target date range. """
-    return render_template('fitbitdata.html')
+    if session.get('user_id') != None:
+        return render_template('fitbitdata.html')
+    else:
+        flash('You must log in in order to access your FitBit data.')
+        return redirect('/login')
 
 def download_fitbitdata(date1, date2):
     #downloads all types of fitbit data for date range
@@ -300,9 +327,6 @@ def fitbitdata():
         flash('Please provide all of the required information')
         return redirect('/getfit')
 
-@app.route('/ehrtemplate', methods = ['GET'])
-def show_ehr_template():
-    return render_template('ehrtemplate.html')
 
 def predict(date1, date2):
     #uses logistic regression models to predict mental health test scores based on biometric data
@@ -355,87 +379,94 @@ def predict(date1, date2):
 def chart_data():
     """Return biometric data and personal test
      scores to be displayed on a chart"""
-    
-    user = User.query.filter(User.user_id == session['user_id']).first()
-    firstchart_type = request.args.get('firstchart_type')
-    secchart_type = request.args.get('secchart_type')
-    formatType = request.args.get('format')
+    if session.get('user_id') != None:
+        user = User.query.filter(User.user_id == session['user_id']).first()
+        firstchart_type = request.args.get('firstchart_type')
+        secchart_type = request.args.get('secchart_type')
+        formatType = request.args.get('format')
 
-    data_dict = {}
-    first_dict = {}
-    second_dict = {}
+        data_dict = {}
+        first_dict = {}
+        second_dict = {}
 
-    if firstchart_type == 'PHQ9':
-        for i in user.phq:
-            first_dict[str(i.date)] = (int(i.score))
-    elif firstchart_type == 'GAD7':
-        for i in user.gad:
-            first_dict[str(i.date)] = (int(i.score))
-    else:
-        for i in user.sleep:
-            first_dict[str(i.date)] = (int(i.score))
+        if firstchart_type == 'PHQ9':
+            for i in user.phq:
+                first_dict[str(i.date)] = (int(i.score))
+        elif firstchart_type == 'GAD7':
+            for i in user.gad:
+                first_dict[str(i.date)] = (int(i.score))
+        else:
+            for i in user.sleep:
+                first_dict[str(i.date)] = (int(i.score))
 
-    if secchart_type =='Resting Heart Rate':
-        for j in user.dailymetrics:
-            second_dict[str(j.date)] = (int(j.resting_hr))
-    elif secchart_type == 'Steps':
-        for j in user.dailymetrics:
-            second_dict[str(j.date)] = (int(j.steps))
-    elif secchart_type == 'Mins Slept':
-        for j in user.dailymetrics:
-            second_dict[str(j.date)] = (int(j.sleep))
-    elif secchart_type == 'Mins Exercise':
-        for j in user.dailymetrics:
-            second_dict[str(j.date)] = (int(j.mins_exercise))
-    else:
-        for j in user.dailymetrics:
-            second_dict[str(j.date)] = (int(j.mins_sedentary))
-  
-    data_dict['data1'] = first_dict
-    data_dict['data2'] = second_dict
-    secdata_lst = sorted(data_dict['data2'].items())
-    date_labels = [x[0] for x in secdata_lst] #second dataset will always have more dates
-    for date in date_labels:
-        value = data_dict['data1'].get(date, None)
-        data_dict['data1'][date] = value
-    firstdata_lst = sorted(data_dict['data1'].items())
-    first_data = [x[1] for x in firstdata_lst]
-    sec_data = [x[1] for x in secdata_lst]
-    stats1 = [x for x in first_data if x != None]
-    stats2 = [x for x in sec_data if x != None]
-    stats = add_stats(stats1, stats2)
+        if secchart_type =='Resting Heart Rate':
+            for j in user.dailymetrics:
+                second_dict[str(j.date)] = (int(j.resting_hr))
+        elif secchart_type == 'Steps':
+            for j in user.dailymetrics:
+                second_dict[str(j.date)] = (int(j.steps))
+        elif secchart_type == 'Mins Slept':
+            for j in user.dailymetrics:
+                second_dict[str(j.date)] = (int(j.sleep))
+        elif secchart_type == 'Mins Exercise':
+            for j in user.dailymetrics:
+                second_dict[str(j.date)] = (int(j.mins_exercise))
+        else:
+            for j in user.dailymetrics:
+                second_dict[str(j.date)] = (int(j.mins_sedentary))
+      
+        data_dict['data1'] = first_dict
+        data_dict['data2'] = second_dict
+        secdata_lst = sorted(data_dict['data2'].items())
+        date_labels = [x[0] for x in secdata_lst] #second dataset will always have more dates
+        for date in date_labels:
+            value = data_dict['data1'].get(date, None)
+            data_dict['data1'][date] = value
+        firstdata_lst = sorted(data_dict['data1'].items())
+        first_data = [x[1] for x in firstdata_lst]
+        sec_data = [x[1] for x in secdata_lst]
+        stats1 = [x for x in first_data if x != None]
+        stats2 = [x for x in sec_data if x != None]
+        stats = add_stats(stats1, stats2)
 
-    if formatType == 'json':
-        return jsonify({
-            "labels": date_labels,
-            "datasets": [
-                {
-                    "label": firstchart_type,
-                    "data": first_data,
-                    "colorOpts": {}
-                },
-                {
-                    "label": secchart_type,
-                    "data": sec_data,
-                    "colorOpts": {                    
-              "backgroundColor": "rgb(232, 129, 109)",
-              "borderColor": "rgb(109, 232, 129)",
-              "pointHoverBackgroundColor": "rgb(150, 75, 220)",
-              "pointHoverBorderColor": "rgb(75, 218, 220)",
-            }
+        if formatType == 'json':
+            return jsonify({
+                "labels": date_labels,
+                "datasets": [
+                    {
+                        "label": firstchart_type,
+                        "data": first_data,
+                        "colorOpts": {}
+                    },
+                    {
+                        "label": secchart_type,
+                        "data": sec_data,
+                        "colorOpts": {                    
+                  "backgroundColor": "#99D3DF",
+                  "borderColor": "#99D3DF",
+                  "pointHoverBackgroundColor": "#99D3DF",
+                  "pointHoverBorderColor": "#99D3DF",
                 }
-            ],
-            "stats":stats
-            })
+                    }
+                ],
+                "stats":stats
+                })
 
 
-    return render_template('chartdata.html', labels = date_labels, data1 = first_data, data2 = sec_data, stats = stats)
-
+        return render_template('chartdata.html', labels = date_labels, data1 = first_data, 
+            data2 = sec_data, stats = stats) 
+    else:
+        flash('You must log in in order to access your data.')
+        return redirect('/login')
 
 
 @app.route('/newtest', methods = ['GET'])
 def navigate_to_tests():
-    return render_template('newtest.html')
+    if session.get('user_id') != None:
+        return render_template('newtest.html')
+    else:
+        flash('You must log in in order to take a test.')
+        return redirect('/login')
 
 @app.route('/newtest', methods = ['POST'])
 def insert_answers_into_db():
@@ -468,8 +499,8 @@ def insert_answers_into_db():
         db.session.add(new_test)
         db.session.commit()
         print(new_test.dep_severity)
-        flash('You successfully submitted your PHQ9 results. ')
-        return redirect ('/user_profile')
+        flash(f'You successfully submitted your PHQ9 results. Your score is {score} which indicates a Depression severity of "{dep_severity}"')
+        return redirect ('/dashboard')
     elif test_type == 'gad':
         q1_answer = int(request.form.get('q1gad'))
         q2_answer = int(request.form.get('q2gad'))
@@ -493,8 +524,8 @@ def insert_answers_into_db():
         db.session.add(new_test)
         db.session.commit()
 
-        flash('You successfully submitted your GAD7 results.')
-        return redirect ('/user_profile')
+        flash(f'You successfully submitted your GAD7 results. Your score is {score} which indicates an Anxiety severity of "{anx_severity}"')
+        return redirect ('/dashboard')
     elif test_type == 'sleep':
         q1_answer = int(request.form.get('q1'))
         q2_answer = int(request.form.get('q2'))
@@ -518,8 +549,8 @@ def insert_answers_into_db():
         db.session.add(new_test)
         db.session.commit()
 
-        flash('You successfully submitted your Sleep Questionnaire results.')
-        return redirect ('/user_profile')
+        flash(f'You successfully submitted your Sleep Questionnaire results. Your score is {score} which indicates an Insomnia severity of "{insomnia_severity}"')
+        return redirect ('/dashboard')
     else: 
         flash('Please select a type of test to take.')
         return redirect('/newtest')

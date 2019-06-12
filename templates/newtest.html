@@ -18,6 +18,7 @@
 
 <!--       on submit, show/hide form selected to allow for completion of test. -->
 <div id = 'gad'>
+    <br>
     <h3> Generalized Anxiety Disorder Evaluation (GAD7) </h3>
     <h4> A seven question test designed to assess the degree of anxiety severity. </h4>
   <h5> How often have you been bothered by the following over the past two weeks? </h5>
@@ -63,11 +64,12 @@
         <input type = "radio" name = "q7gad" value = "1"> Several days <br>
         <input type = "radio" name = "q7gad" value = "2"> More than half the days <br>
         <input type = "radio" name = "q7gad" value = "3"> Nearly every day <br>
-        <button type="submit">Submit
-        </button>
+        <button class="btn btn-lg btn-light" type="submit">Submit
+            </button>
 
       </div>
 <div id = 'phq'>
+    <br>
     <h3> Patient Health Questionnaire (PHQ9) </h3>
     <h4> A nine question test designed to assess the degree of depression severity. </h4>
   <h5> How often have you been bothered by the following over the past two weeks? </h5>
@@ -124,11 +126,12 @@
         <input type = "radio" name = "q9phq" value = "1"> Several days <br>
         <input type = "radio" name = "q9phq" value = "2"> More than half the days <br>
         <input type = "radio" name = "q9phq" value = "3"> Nearly every day <br>
-        <button type="submit">Submit
-        </button>
+        <button class="btn btn-lg btn-light" type="submit">Submit
+            </button>
     </div>
 
 <div id = 'isi'>
+    <br>
     <h3> Sleep Questionnaire (Insomnia Severity Index) </h3>
     <h4> A seven question test designed to assess the degree of insomnia severity. </h4>
   <h5> Please rate the current (i.e. last two weeks) severity of your sleep problem(s). </h5>
@@ -180,24 +183,21 @@
         <input type = "radio" name = "q7" value = "3"> Much <br>
         <input type = "radio" name = "q7" value = "4"> Very much interfering <br>
 
-        <button type="submit">Submit
+        <button class="btn btn-lg btn-light" type="submit">Submit
         </button>
         
         </div>
       </body>
     </form>
-<footer>
 
-    <div>
+<footer>
+    <div> <br><br>
                   <form action = "/logout" method = "POST"> 
-                  <input type = "submit" value = "Log Out"> <!--    Show only when user is logged in using JS -->
+                  <input type = "submit" class="btn btn-light"value = "Log Out"> <!--    Show only when user is logged in using JS -->
                  </form>
             </div>
         </footer>
 
-<script src="https://code.jquery.com/jquery-3.4.1.js"
-  integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
-  crossorigin="anonymous"></script>
 <script>
 
 $(function(){

@@ -1,38 +1,57 @@
 {% extends 'base.html' %}
 
 {% block body %}
+<style>
+  .lineChart {
+    padding-left: 150px;
+    padding-right: 150px;
+  }
+  .btn {
+    margin-right:50px;
+  }
+  #logout {
+    margin-left:50px;
+  }
+  #stats {
+    display:none;
+  }
 
-<h2 class="form-signin-heading">Your FitBit Data</h2>
-     <br><br>
-<div>
-<ul> 
-<form action = "/chartdata" id = "chartdata" name = "chartdata"> Select what type of data you would like to chart: <br>
-  <input type = "radio" class = "chart" name = "firstchart_type" value = "PHQ" required> PHQ9 Scores <br>
-  <input type = "radio" class = "chart" name = "firstchart_type" value = "GAD7" required> GAD7 Scores <br>
-  <input type ="radio" class = "chart" name = "firstchart_type" value = "ISI" required> Insomnia Sleep Questionnaire <br><br>
-  <input type = "radio" class = "chart" name = "secchart_type" value = "Steps" required> Steps <br>
-  <input type = "radio" class = "chart" name = "secchart_type" value = "Resting Heart Rate" required> Resting Heart Rate <br>
-  <input type ="radio" class = "chart" name = "secchart_type" value = "Mins Slept" required> Mins Slept <br>
-  <input type = "radio" class = "chart" name = "secchart_type" value = "Mins Exercise" required> Mins Exercise <br>
-  <input type = "radio" class = "chart" name = "secchart_type" value = "Mins Sedentary" required> Mins Sedentary <br>
-     <button id = "submitbutton" type="submit">Submit 
-        </button>
-  </form>
-</ul>
-</div>
-
-<div class="container">
-  <div class="row">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-body">
-
-          <canvas id='lineChart'></canvas>
-        </div>
+</style>
+<div class="card-deck">
+  <div class="card border-light mb-3" style="max-width: 30rem;">
+    <div class="card-header">Model Your FitBit Data</div>
+      <div class="card-body">
+        <h5 class="card-title">Select what type of data you would like to chart:</h5>
+          <p class="card-text">
+            <form action = "/chartdata" id = "chartdata" name = "chartdata"> Select what type of data you would like to chart: <br>
+          <input type = "radio" class = "chart" name = "firstchart_type" value = "PHQ" required> PHQ9 Scores <br>
+          <input type = "radio" class = "chart" name = "firstchart_type" value = "GAD7" required> GAD7 Scores <br>
+          <input type ="radio" class = "chart" name = "firstchart_type" value = "ISI" required> Insomnia Sleep Questionnaire <br><br>
+          <input type = "radio" class = "chart" name = "secchart_type" value = "Steps" required> Steps <br>
+          <input type = "radio" class = "chart" name = "secchart_type" value = "Resting Heart Rate" required> Resting Heart Rate <br>
+          <input type ="radio" class = "chart" name = "secchart_type" value = "Mins Slept" required> Mins Slept <br>
+          <input type = "radio" class = "chart" name = "secchart_type" value = "Mins Exercise" required> Mins Exercise <br>
+          <input type = "radio" class = "chart" name = "secchart_type" value = "Mins Sedentary" required> Mins Sedentary <br>
+            <button class="btn btn-lg btn-light" type="submit">Submit
+            </button>
+          </form>
+        </p>
+    </div>
+  </div>
+  <div class="card border-light mb-3" style="max-width:30rem;" id="stats">
+    <div class="card-header"> Statistics </div>
+      <div class="card-body">
+        <p class="card-text"> <b>Statistics for Your Test: </b><br>
+          Mean Test Score: <span id='testmean'></span><br>Median Test Score: <span id='testmedian'></span><br>Range of Test Scores: <span id='testrange'></span><br> Standard Deviation of Test Scores: <span id='teststd'></span><br><br><b>Statistics for Your Biometric Data: </b><br>Metric Mean: <span id='fitmean'></span><br>Metric Median: <span id='fitmedian'></span><br> Metric Range: <span id='fitrange'></span><br> Standard Deviation of Your Metric: <span id='fitstd'></span><br>
+        </p>
       </div>
     </div>
   </div>
-</div>
+
+
+  <div class='lineChart'>
+    <canvas id='lineChart'></canvas>
+  </div>
 
 
 <script>
@@ -44,10 +63,10 @@ function createDataset(label, data, colorOpts = {}) {
       label: label,
       fill: false,
       lineTension: 0.1,
-      backgroundColor: colorOpts.backgroundColor || "rgb(63, 191, 191)",
+      backgroundColor: colorOpts.backgroundColor || "#88BBD6",
       yAxisId: "id1",
       borderColor: (
-        colorOpts.borderColor || "rgb(231, 89, 231)"
+        colorOpts.borderColor || "#88BBD6"
         ), 
       borderCapStyle: 'square',
       borderDash: [], 
@@ -58,10 +77,10 @@ function createDataset(label, data, colorOpts = {}) {
       pointBorderWidth: 1,
       pointHoverRadius: 8,
       pointHoverBackgroundColor: (
-        colorOpts.pointHoverBackgroundColor || "rgb(89, 231, 160)"
+        colorOpts.pointHoverBackgroundColor || "#88BBD6"
         ),
       pointHoverBorderColor: (
-        colorOpts.pointHoverBorderColor || "rgb(109, 211, 232)"
+        colorOpts.pointHoverBorderColor || "#88BBD6"
         ),
       pointHoverBorderWidth: 2,
       pointRadius: 4,
@@ -76,11 +95,8 @@ function createDataset(label, data, colorOpts = {}) {
 
 $(document).on('ready', () => {
 
-  console.log('hi');
-
   const ctx = $('#lineChart').get(0).getContext('2d');
-  console.log(ctx);
-  
+
 
   const options = {
     responsive: true,
@@ -157,8 +173,19 @@ $(document).on('ready', () => {
     $.get('/chartdata', formData, (data)=> {
       const lengthLabel = fitbitLineChart.data.labels.length;
       const lengthDataset = fitbitLineChart.data.datasets.length;
-      $('.legend').html(data.stats);
-      console.log(data.stats);
+
+      const fitdata = data.stats.fit;
+      const testdata = data.stats.test;
+      console.log(data.stats)
+
+      $('#testmean').html(testdata.mean);
+      $('#testmedian').html(testdata.median);
+      $('#testrange').html(testdata.range);
+      $('#teststd').html(testdata.std);
+      $('#fitmean').html(fitdata.mean);
+      $('#fitmedian').html(fitdata.median);
+      $('#fitrange').html(fitdata.range);
+      $('#fitstd').html(fitdata.std);
 
       for (let i = 0; i<lengthLabel; i++) {
         fitbitLineChart.data.labels.pop();
@@ -179,35 +206,31 @@ $(document).on('ready', () => {
                               dataset.colorOpts);
 
         fitbitLineChart.data.datasets.push(newConfig);
-      }
-
-
+      };
 
       fitbitLineChart.update();
     });
+
   });
 
 });
+$('#chartdata').on('submit', ()=> {
+  $('#stats').show();
+});
+
 </script>
 
-<footer>
-    <div>
-                  <form action = "/logout" method = "POST"> 
-                  <input type = "submit" value = "Log Out"> <!--    Show only when user is logged in using JS -->
-                 </form>
-            </div>
-        </footer>
 
 </ul>
 </div>
-  <span><h3> <form action = '/getfit' method = 'GET'> <a href = '/getfit'> Access more FitBit data</a></form> </h3>
-  <h3> <form action = '/newtest' method = 'GET'> <a href = '/newtest'> Take a new mental health test</a></form> </h3> 
-  <h3> <form action = '/chartdata' method = 'GET'><a href = '/chartdata'> View Chart </a></form></h3></span>
+<h4><form action = '/getfit' method = 'GET'> <a href = '/getfit' class="btn btn-info" role="button" style="float:right;"> Access more FitBit data</a></form> </h4><br>
+  <h4> <form action = '/newtest' method = 'GET'> <a href = '/newtest' class="btn btn-info" role="button" style="float:right;"> Take a new mental health test</a></form></h4><br>
+  <h4> <form action = '/chartdata' method = 'GET'><a href = '/chartdata' class="btn btn-info" role="button" style="float:right;"> View Chart </a></form></h4><br>
 
 <footer>
-    <div>
+    <div> <br><br>
                   <form action = "/logout" method = "POST"> 
-                  <input type = "submit" value = "Log Out"> <!--    Show only when user is logged in using JS -->
+                  <input type = "submit" class="btn btn-light" id="logout" value = "Log Out"> <!--    Show only when user is logged in using JS -->
                  </form>
             </div>
         </footer>

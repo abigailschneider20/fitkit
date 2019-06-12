@@ -1,34 +1,43 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<script
-  src="https://code.jquery.com/jquery-3.4.1.js"
-  integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
-  crossorigin="anonymous"></script>
-<h2 class="form-signin-heading">Import your FitBit data</h2>
-    <form action="/fitbitdata" method="GET">
-      Select a date or date range: <br>
-       <input type = "date" name = "date1"> Start Date <br>
-       <input type = "date" name = "date2"> End Date  <br>
+<style>
+  .card {
+    text-align: center;
+    background-color:#E9E9E9;
+    border-color:#99D3DF;
+    border-width:10px;
+    margin:0 auto;
+    float:none;
+    margin-bottom:10px;
+  }
+</style>
+<div class="card border-#99D3DF mb-3" style="max-width:18rem;">
+  <div class="card-header">Import your FitBit data</div>
+    <div class="card-body">
+      <form action="/fitbitdata" method="GET">
+        <h5 class="card-title"> Select a date range: </h5>
+          <p class="card-text">
+          Start Date <br><input type = "date" name = "date1"> <br><br>
+          End Date <br><input type = "date" name = "date2"><br><br></p>
 
+            <button class="btn btn-lg btn-light" type="submit">Submit
+            </button>
+      </div>
+    </div>
+</form>
 
-        
-        <button type="submit">Submit
-        </button>
-
-
-    </form>
-  <span><h3> <form action = '/getfit' method = 'GET'> <a href = '/getfit'> Access more FitBit data</a></form> </h3>
-  <h3> <form action = '/newtest' method = 'GET'> <a href = '/newtest'> Take a new mental health test</a></form> </h3> 
-  <h3> <form action = '/chartdata' method = 'GET'><a href = '/chartdata'> View Chart </a></form></h3></span>
+  <h4> <form action = '/getfit' method = 'GET'> <a href = '/getfit' class="btn btn-info" role="button" style="float:right;"> Access more FitBit data</a></form> </h4><br>
+  <h4> <form action = '/newtest' method = 'GET'> <a href = '/newtest' class="btn btn-info" role="button" style="float:right;"> Take a new mental health test</a></form></h4><br>
+  <h4> <form action = '/chartdata' method = 'GET'><a href = '/chartdata' class="btn btn-info" role="button" style="float:right;"> View Chart </a></form></h4><br>
 
 <footer>
-    <div>
+    <div> <br><br>
                   <form action = "/logout" method = "POST"> 
-                  <input type = "submit" value = "Log Out"> <!--    Show only when user is logged in using JS -->
+                  <input type = "submit" class="btn btn-light"value = "Log Out"> <!--    Show only when user is logged in using JS -->
                  </form>
             </div>
         </footer>
-        </footer>
+
 
 {% endblock %}

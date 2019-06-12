@@ -1,70 +1,68 @@
 {% extends 'base.html' %}
 {% block body %}
-<br>
-<div>
-  <h1> FitKit Data for: {{ user.f_name }} </h1>
+<style>
+  body {
+    text-align: center;
+  }
+  .card {
+    margin-right:auto;
+    margin-left:auto;
+  }
+  .profile-sidebar {
+    text-align: center;
+    background-color:#E9E9E9;
+    border-color:#99D3DF;
+    border-width:10px;
+    margin:0 auto;
+    float:none;
+    margin-bottom:10px;
+  }
+  .profile-userpic img {
+    float:none;
+    margin: 0 auto;
+    width: 50%;
+    height: 50%;
+    -webkit-border-radius:50% !important;
+    -moz-border-radius:50% !important;
+    border-radius:50% !important;
+  }
 
-  <span><h3> <form action = '/getfit' method = "GET"> <a href = "/getfit"> Access your FitBit data</a></form> </h3>
-  <h3> <form action = '/newtest' method = "GET"> <a href = "/newtest"> Take a new mental health test</a></form> </h3> </span>
-  {% if user.dailymetrics %}
-
-    <h2>Daily Metrics</h2>
-    <ul>
-    {% for metric in user.dailymetrics %}
-        <h4> Data for {{metric.date}} </h4> <br>
-        <li> Steps: {{metric.steps}} <br>
-        Sleep: {{metric.sleep}} <br>
-      Sedentary Minutes: {{metric.mins_sedentary}} <br>
-    Active Minutes: {{metric.mins_exercise}} <br>
-  Resting Heart Rate: {{metric.resting_hr}} <br></li> <br>
-     
-    {% endfor %}
-  </ul>
-   {% endif %}
-    {% if user.phq %}
-
-    <h2>PHQ-9 Scores</h2>
-    <ul>
-    {% for test in user.phq %}
-        <h3>Data for PHQ-9 taken on {{test.date}}: </h3> <br>
-        <li>Total Score: {{test.score}}</li>
-        <li>Indicated Depression Severity: {{test.dep_severity}} </li>
-
-    {% endfor %}
-    </ul>
-  {% endif %}
-
-    {% if user.gad %}
-
-    <h2>GAD-7 Scores</h2>
-    <ul>
-    {% for test in user.gad %}
-        <h3>Data for GAD-7 taken on {{test.date}}: </h3> <br>
-        <li>Total Score: {{test.score}}</li>
-        <li>Indicated Anxiety Severity: {{test.anx_severity}} </li>
-
-    {% endfor %}
-    </ul>
-  {% endif %} 
+</style>
+<div class="card border-#99D3DF mb-3" style="max-width:18rem;">
+  <div class="card-header">Profile</div>
+    <div class="card-body">
+    <div class="col-lg-9">
+      <div class="profile">
+        <div class="profile-logo">
+          <img src="static/fit.png" class="img-responsive" alt="">
+        </div>
+        <div class="profile-usertitle">
+          <div class="profile-usertitle-name">
+            {{user.f_name}} {{user.l_name}}
+          </div>
+          <div class="profile-user-info">
+            Height: {{((user.height//0.0254)//12)|int}} ft {{((user.height/0.3048)%1 * 12)|int}} in <br>
+            Weight: {{((user.weight)*2.2)|int}} lbs <br>
+          </div>
+        </div>
+        <div class="profile-userbuttons">
+          <a href= "https://accounts.fitbit.com/login?targetUrl=https%3A%2F%2Fwww.fitbit.com%2Flogin%2Ftransferpage%3Fredirect%3Dhttps%253A%252F%252Fwww.fitbit.com&lcl=en_US" role="button" class="btn btn-danger">Your FitBit Account </a>
+  
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
-    {% if user.sleep %}
+  <h4><form action = '/getfit' method = 'GET'> <a href = '/getfit' class="btn btn-info" role="button" style="float:right;"> Access more FitBit data</a></form> </h4><br>
+  <h4> <form action = '/newtest' method = 'GET'> <a href = '/newtest' class="btn btn-info" role="button" style="float:right;"> Take a new mental health test</a></form></h4><br>
+  <h4> <form action = '/chartdata' method = 'GET'><a href = '/chartdata' class="btn btn-info" role="button" style="float:right;"> View Chart </a></form></h4><br>
 
-    <h2>Sleep Questionnaire Scores</h2>
-    <ul>
-    {% for test in user.sleep %}
-        <h3>Data for Sleep Questionnaire taken on {{test.date}}: </h3> <br>
-        <li>Total Score: {{test.score}}</li>
-        <li>Indicated Insomnia Severity: {{test.insomnia_severity}} </li>
-
-    {% endfor %}
-    </ul>
-  {% endif %} 
-</div>
 <footer>
-    <div>
+    <div> <br><br>
                   <form action = "/logout" method = "POST"> 
-                  <input type = "submit" value = "Log Out"> <!--    Show only when user is logged in using JS -->
+                  <input type = "submit" class="btn btn-light"value = "Log Out"> <!--    Show only when user is logged in using JS -->
                  </form>
             </div>
         </footer>

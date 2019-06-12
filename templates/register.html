@@ -1,12 +1,58 @@
 {% extends 'base.html' %}
 
 {% block body %}
+<style>
+      body {
+      font-family: 'Martel', serif;
+      padding-top: 200px;
+      }
+      .register, .image {
+        min-height: 100vh;
+      }
 
-<h1>Registration Form:</h1>
+      .register-heading {
+        font-weight:800;
+      }
+      .register-heading2 {
+        font-weight:400;
+      }
+
+      .form-label-group{
+        position:relative;
+        margin-bottom:1em;
+      }
+      .form-label-group>label{
+        position: absolute;
+        top:0;
+        left:0;
+        display:block;
+        width:100%;
+        margin-bottom:0;
+        line-height:1.5;
+        color:#88BBD6;
+        cursor:text;
+        border:1px solid transparent;
+        border-radius:0.25em;
+        transition:all .1s ease-in-out;
+      }
+
+
+ </style>
+
+ <div class="container-fluid">
+  <div class="row no-gutter">
+    <div class="d-none d-md-flex col-md-4 col-lg-6" style="background:url('static/step.jpg') no-repeat center center /cover"></div>
+    <div class="col-md-8 col-lg-6">
+      <div class="login d-flex align-items-center py-5">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-9 col-lg-8 mx-auto">
+              <h1 class="register-heading mb-4"> Take the First Step!
+                <h5 class="register-heading2">Create an Account</h5>
+                <br><br>
+
 
     <form action = '/register' class="form-register" method="POST">
-
-        <h2 class="form-register-heading">Create Your FitKit Account</h2>
 
         <div class="form-group">
             <label for="email-field" class="sr-only">Email Address</label>
@@ -55,10 +101,14 @@
         </div>
 
 
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Create your account
-        </button>
 
+
+        <button class="btn btn-lg btn-primary btn-block btn-light text-uppercase font-weight-bold mb-2" type="submit">Create your Account
+        </button>
+        <a href="login" class="btn btn-sm btn-light" role="button" style= "float:right;"> Already Registered? Log In </a>
     </form>
+
+
 
 
 {% endblock %}

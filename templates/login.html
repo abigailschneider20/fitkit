@@ -1,33 +1,99 @@
 {% extends 'base.html' %}
 
+<style>
+      body {
+      font-family: 'Martel', serif;
+      padding-top: 200px;
+      }
+      .login, .image {
+        min-height: 100vh;
+      }
+
+      .login-heading {
+        font-weight:800;
+      }
+      .login-heading2 {
+        font-weight:400;
+      }
+      .btn-login {
+        font-size: 1em;
+        letter-spacing: 0.05em;
+        padding: 0.75em 1em;
+        border-radius:2em;
+
+      }
+
+      .form-label-group{
+        position:relative;
+        margin-bottom:1em;
+      }
+      .form-label-group>label{
+        position: absolute;
+        top:0;
+        left:0;
+        display:block;
+        width:100%;
+        margin-bottom:0;
+        line-height:1.5;
+        color:#88BBD6;
+        cursor:text;
+        border:1px solid transparent;
+        border-radius:0.25em;
+        transition:all .1s ease-in-out;
+      }
+
+
+ </style>
+
+
 {% block body %}
+<div class="container-fluid">
+  <div class="row no-gutter">
+    <div class="d-none d-md-flex col-md-4 col-lg-6" style="background:url('static/meditate.jpg') no-repeat center center /cover"></div>
+    <div class="col-md-8 col-lg-6">
+      <div class="login d-flex align-items-center py-5">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-9 col-lg-8 mx-auto">
+              <h3 class="login-heading mb-4">Welcome back! 
+                <h5 class="login-heading2">Log In to FitKit</h5>
+                <br><br>
 
     <form class="form-signin" method="POST">
-
-        <h2 class="form-signin-heading">Log In to Your FitBit Account</h2>
-
-        <div class="form-group">
+      <div class="form-label-group">
             <label for="email-field" class="sr-only">Email Address</label>
             <input type="email"
                    name="email"
-                   class="form-control input-lg"
+                   class="form-control input-md"
                    placeholder="Email Address"
-                   required
                    autofocus>
         </div>
-
-        <div class="form-group">
+        <br> 
+        <div class="form-label-group">
             <label for="password-field" class="sr-only">Password</label>
             <input type="password"
                    name="password"
-                   class="form-control input-lg"
-                   placeholder="Password"
-                   required>
+                   class="form-control input-md"
+                   placeholder="Password">
         </div>
+        <br>
+        <div class="custom-control custom-checkbox mb-3">
+          <input type="checkbox" class="custom-control-input" id="customCheck1">
+          <label class="custom-control-label" for="customCheck1"> Remember password </label></div>
 
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Log In
+
+        <button class="btn btn-lg btn-primary btn-block btn-light text-uppercase font-weight-bold mb-2" type="submit">Log In
         </button>
+        <a href="register" class="btn btn-sm btn-light " role="button" style= "float:right;">New user? Register here </a>
 
     </form>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
 
 {% endblock %}
