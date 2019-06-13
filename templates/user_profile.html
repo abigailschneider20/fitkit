@@ -1,46 +1,29 @@
 {% extends 'base.html' %}
 {% block body %}
 <style>
-  body {
-    text-align: center;
-  }
   .card {
-    margin-right:auto;
-    margin-left:auto;
-  }
-  .profile-sidebar {
     text-align: center;
-    background-color:#E9E9E9;
-    border-color:#99D3DF;
-    border-width:10px;
     margin:0 auto;
     float:none;
     margin-bottom:10px;
   }
-  .profile-userpic img {
-    float:none;
-    margin: 0 auto;
-    width: 50%;
-    height: 50%;
-    -webkit-border-radius:50% !important;
-    -moz-border-radius:50% !important;
-    border-radius:50% !important;
-  }
-
+.profile-userbuttons{
+  margin-bottom:20px;
+}
+.btn-info {
+  margin-right:50px;
+}
 </style>
 <div class="card border-#99D3DF mb-3" style="max-width:18rem;">
   <div class="card-header">Profile</div>
     <div class="card-body">
-    <div class="col-lg-9">
-      <div class="profile">
-        <div class="profile-logo">
-          <img src="static/fit.png" class="img-responsive" alt="">
+      <div class="profile-logo">
+        <img src="static/fit.png" class="img-responsive" alt="">
         </div>
-        <div class="profile-usertitle">
-          <div class="profile-usertitle-name">
+        <div class="card-title">
             {{user.f_name}} {{user.l_name}}
           </div>
-          <div class="profile-user-info">
+          <div class="card-text" >
             Height: {{((user.height//0.0254)//12)|int}} ft {{((user.height/0.3048)%1 * 12)|int}} in <br>
             Weight: {{((user.weight)*2.2)|int}} lbs <br>
           </div>

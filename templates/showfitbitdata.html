@@ -45,7 +45,7 @@
               <li class="pull-left">{{rec}}</li>
               {% endfor %}
             {% else %}
-            Maintain your current level of physical fitness.
+            Maintain your current level of physical fitness. Consider mixing up your current exercise routine if you feel yourself starting to get bored!
             {% endif %} <br>
     
       </div>
@@ -80,5 +80,10 @@
         </footer>
 
 <script>
+  const activepage=1;
+  function paginate(showPageId) {
+    activepage=showPageid;
+    $('')
+  }
 </script>
 {% endblock %}

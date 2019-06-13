@@ -1,66 +1,167 @@
 {% extends 'base.html' %}
 {% block body %}
-<br>
+<head>
+<script src="https://kit.fontawesome.com/508d817dd4.js"></script>
+</head>
+<style>
+
+ .nav-item{
+    overflow:hidden;
+ }
+ .nav-item a{
+  float:left;
+  color:#88BBD6;
+  text-align:left;
+  padding:14px, 16px;
+  text-decoration:none;
+  font-size:16px;
+  border-bottom: 2px solid transparent;
+ }
+ .nav-item a:hover {
+  border-bottom: 3px solid #99D3DF;
+ }
+
+
+</style>
 <div>
-  <h1> FitKit Data for: {{ user.f_name }} </h1>
+  <h1> FitKit Data for {{ user.f_name }} </h1>
 
-  <span><h3> <form action = '/getfit' method = "GET"> <a href = "/getfit"> Access your FitBit data</a></form> </h3>
-  <h3> <form action = '/newtest' method = "GET"> <a href = "/newtest"> Take a new mental health test</a></form> </h3> </span>
-  {% if user.dailymetrics %}
-
-    <h2>Daily Metrics</h2>
-    <ul>
-    {% for metric in user.dailymetrics %}
-        <h4> Data for {{metric.date}} </h4> <br>
-        <li> Steps: {{metric.steps}} <br>
-        Sleep: {{metric.sleep}} <br>
-      Sedentary Minutes: {{metric.mins_sedentary}} <br>
-    Active Minutes: {{metric.mins_exercise}} <br>
-  Resting Heart Rate: {{metric.resting_hr}} <br></li> <br>
-     
-    {% endfor %}
-  </ul>
-   {% endif %}
-    {% if user.phq %}
-
-    <h2>PHQ-9 Scores</h2>
-    <ul>
-    {% for test in user.phq %}
-        <h3>Data for PHQ-9 taken on {{test.date}}: </h3> <br>
-        <li>Total Score: {{test.score}}</li>
-        <li>Indicated Depression Severity: {{test.dep_severity}} </li>
-
-    {% endfor %}
-    </ul>
-  {% endif %}
-
-    {% if user.gad %}
-
-    <h2>GAD-7 Scores</h2>
-    <ul>
-    {% for test in user.gad %}
-        <h3>Data for GAD-7 taken on {{test.date}}: </h3> <br>
-        <li>Total Score: {{test.score}}</li>
-        <li>Indicated Anxiety Severity: {{test.anx_severity}} </li>
-
-    {% endfor %}
-    </ul>
-  {% endif %} 
-
-
-    {% if user.sleep %}
-
-    <h2>Sleep Questionnaire Scores</h2>
-    <ul>
-    {% for test in user.sleep %}
-        <h3>Data for Sleep Questionnaire taken on {{test.date}}: </h3> <br>
-        <li>Total Score: {{test.score}}</li>
-        <li>Indicated Insomnia Severity: {{test.insomnia_severity}} </li>
-
-    {% endfor %}
-    </ul>
-  {% endif %} 
+<div class="container-fluid">
+  <div class="row">
+    <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+      <div class="sidebar-sticky">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="/profile"><i class="fas fa-id-card" aria-hidden="true"></i> User Profile <span class="sr-only"></span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/chartdata"><i class="fas fa-chart-line" aria-hidden="true"></i> Charts <span class="sr-only"></span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/getfit"><i class="fas fa-heartbeat" aria-hidden="true"></i> Access More FitBit Data <span class="sr-only"></span> </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/newtest"><i class="far fa-edit" aria-hidden="true"></i> Mental Health Tests <span class="sr-only"></span></a>
+            </li> 
+            <li class="nav-item">
+            <a class="nav-link" href="/bmi"><i class="fas fa-weight" aria-hidden="true"></i>  Calculate BMI <span class="sr-only"></span></a>
+            </li> 
+        </ul>
+      </div>
+    </nav>
+    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"> Recent FitBit Data</h1>
+     </div>
+     <div class="table-responsive">
+      <table class="table table-striped table-sm">
+        <thead> FitBit Data
+          <tr> <th> Date </th>
+            <th> Steps </th>
+            <th> Sleep (mins) </th>
+            <th> Sedentary Minutes </th>
+            <th> Active Minutes </th>
+            <th> Resting Heart Rate </th>
+          </tr>
+        </thead>
+   
+            {% if user.dailymetrics %}
+          <tbody>
+              {% for i in range(0,11) %}
+          <tr>
+            <td> {{user.dailymetrics[i].date}} </td>
+            <td> {{user.dailymetrics[i].steps}} </td>
+            <td> {{user.dailymetrics[i].sleep}}</td>
+            <td> {{user.dailymetrics[i].mins_sedentary}}</td>
+            <td> {{user.dailymetrics[i].mins_exercise}}</td>
+            <td> {{user.dailymetrics[i].resting_hr}}</td>
+          </tr>
+             {% endfor %}
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+    </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-striped table-sm"><br>
+        <thead> PHQ9 Scores
+          {% if user.phq %}
+          <tr><th> Date </th>
+            <th> PHQ9 Score </th>
+            <th> Indicated Depression Severity </th>
+          </tr>
+        </thead>
+          <tbody>
+            {% for j in range(0,11) %}
+            <tr>
+              <td> {{user.phq[j].date}} </td>
+              <td> {{user.phq[j].score}} </td>
+              <td> {{user.phq[j].dep_severity}}</td>
+            </tr>
+             {% endfor %}
+            {% else %}
+            <div>
+              No Available Results <br>
+             <a href="/newtest" role="button" class="btn btn-light" style="float:left;"> Take your first PHQ9 test</a> 
+           </div>
+            {% endif %}
+        </tbody>         
+      </table>
+      <div class="table-responsive">
+      <table class="table table-striped table-sm"><br>
+        <thead> GAD7 Scores
+          {% if user.gad %}
+          <tr><th> Date </th>
+            <th> GAD7 Score </th>
+            <th> Indicated Anxiety Severity </th>
+          </tr>
+        </thead>
+          <tbody>
+            {% for k in range(0,11) %}
+            <tr>
+              <td> {{user.gad[k].date}} </td>
+              <td> {{user.gad[k].score}} </td>
+              <td> {{user.gad[k].anx_severity}}</td>
+            </tr>
+             {% endfor %}
+             {% else %}
+              No Available Results <br>
+             <a href="/newtest" role="button" class="btn btn-light" style="float:left;"> Take your first GAD7 test</a> 
+           </div>
+            {% endif %}
+        </tbody>         
+      </table>
+      <div class="table-responsive">
+      <table class="table table-striped table-sm"><br>
+        <thead> Sleep Questionnaire Scores
+          {% if user.sleep %}
+          <tr><th> Date </th>
+            <th> Sleep Questionnaire Score </th>
+            <th> Indicated Insomnia Severity </th>
+          </tr>
+        </thead>
+          <tbody>
+            {% for n in range(0,11) %}
+            <tr>
+              <td> {{user.sleep[n].date}} </td>
+              <td> {{user.sleep[n].score}} </td>
+              <td> {{user.sleep[n].insomnia_severity}}</td>
+            </tr>
+             {% endfor %}
+             {% else %}
+              No Available Results <br>
+             <a href="/newtest" role="button" class="btn btn-light" style="float:left;"> Take your first Sleep Questionnaire</a> 
+           </div>
+            {% endif %}
+        </tbody>         
+      </table>
+  </main>
 </div>
+</div>
+
+
 <h4><form action = '/getfit' method = 'GET'> <a href = '/getfit' class="btn btn-info" role="button" style="float:right;"> Access more FitBit data</a></form> </h4><br>
   <h4> <form action = '/newtest' method = 'GET'> <a href = '/newtest' class="btn btn-info" role="button" style="float:right;"> Take a new mental health test</a></form></h4><br>
   <h4> <form action = '/chartdata' method = 'GET'><a href = '/chartdata' class="btn btn-info" role="button" style="float:right;"> View Chart </a></form></h4><br>

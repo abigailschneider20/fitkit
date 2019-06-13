@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<style>
+  .card {
+    text-align: center;
+    background-color:#E9E9E9;
+    border-color:#99D3DF;
+    border-width:10px;
+    margin:0 auto;
+    float:none;
+    margin-bottom:10px;
+  }
+</style>
+<div class="card border-#99D3DF mb-3" style="max-width:18rem;">
+  <div class="card-header">Your BMI</div>
+    <div class="card-body">
+      <h5 class="card-title"> Your BMI is <b>{{bmi}} </b></h5>
+      <p class="card-text"> Your BMI can be classified as <b>{{assessment}}</b>. <br><br>
+        {% if assessment == 'Normal' %}
+          Continue to consume nutritious foods and maintain a consistent exercise regimen. <br> Your BMI indicates that you are at a healthy weight and are at low risk of serious health conditions.
+        {% elif assessment == 'Underweight' %}
+          Your BMI indicates that you are underweight and it is advised that you consult your healthcare provider for more information about your BMI calculations. <br>Keep in mind that an underweight BMI calculation may pose certain health risks.
+             {% if class_type == 'Depression' %}
+              Based off of your most recent FitBit data, there is a possibility that your low BMI can have a reciprocal link to your symptoms of Depression. Several studies (including <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2631467/">this one</a>) support the conclusion that being underweight may contribute to an increased risk of Depression and Depression can be predictive of being underweight. Depression can be associated with both increased and decreased levels of activity as well as increased and decreased consumption of food, therefore contributing to a possibility of becoming underweight. <br> It is recommended that you adopt a non-strenuous yet physically active lifestyle and consume adequate levels of food, as determined by a healthcare professional such as a dietician.
+            {% elif class_type =='Anxiety' %}
+                Based off of your most recent FitBit data, there is a possibility that your low BMI can have a reciprocal link to your symptoms of Anxiety. Several studies (including <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5090775/">this one</a>) support the conclusion that being underweight may contribute to an increased risk of Anxiety and Anxiety can be predictive of being underweight. <br> Underweight individuals who exhibit symptoms of Anxiety are reported to have body dissatisfaction stemming from a drive for thinness, distorted body image, low self-esteem, and media influence, thus increasing an individual's overall anxiety. <br> It is recommended that you adopt a non-strenuous yet physically active lifestyle and consume adequate levels of food, as determined by a healthcare professional, such as a dietician.
+            {% elif class_type == 'Insomnia' %}
+                Based off of your most recent FitBit data, there is a possibility that your low BMI can have a link to your symptoms of Insomnia. Several studies (including <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4148405/">this one</a>) support the conclusion that being underweight may contribute to an increased risk of Insomnia. <br> Research suggests that lower calorie intakes may be linked to lower levels of sleep-inducing digestive chemicals (such as cholecystokinin) and increased levels of arousing hormones such as orexin. <br> It is recommended that you adopt a non-strenuous yet physically active lifestyle and consume adequate levels of food, as determined by a healthcare professional, such as a dietician. 
+             {% endif %}
+          {% elif assessment == 'Overweight' %}
+          Your BMI indicates that you are overweight, which may increase your risk of cardiovascular disease. <br>It is advised that you consult your healthcare provider and consider making lifestyle changes through healthier food choices and increased fitness to improve your overall health.
+            {% if class_type == 'Depression' %}
+              Based off of your most recent FitBit data, there is a possibility that your elevated BMI can have a reciprocal link to your symptoms of Depression. Several studies (including <a href="https://jamanetwork.com/journals/jamapsychiatry/fullarticle/210608">this one</a>) support the conclusion that obesity may contribute to an increased risk of Depression and Depression can be predictive of developing obesity. 
+            {% elif class_type =='Anxiety' %}
+                Based off of your most recent FitBit data, there is a possibility that your elevated BMI can have a reciprocal link to your symptoms of Anxiety. Several studies (including <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5090775/">this one</a>) support the conclusion that obesity may contribute to an increased risk of Anxiety and Anxiety can be predictive of developing obesity. 
+            {% elif class_type == 'Insomnia' %}
+                Based off of your most recent FitBit data, there is a possibility that your elevated BMI can have a reciprocal link to your symptoms of Insomnia. Several studies (including <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3630986/">this one </a>) support the conclusion that elevated body weight may contribute to an increased risk of Insomnia and Insomnia can be predictive of developing obesity. <br>Research shows that there is a positive correlation between exercise and sleep disorders and that with increased exercise, quality of life and severity outcomes are positively impacted. <br> It is recommended that you adopt a physically active lifestyle to treat your Insomnia and obesity, as well as reduce your risk for the chronic conditions associated with Insomnia. 
+            {% endif %}
+          {% else %}
+          Your BMI is considered obese, which means you may be at an increased risk for many metabolic conditions such as Type II Diabetes and cardiovascular disease. <br>It is advised that you consult your healthcare provider and consider making lifestyle changes through healthier food choices and increased fitness to improve your overall health. 
+               {% if class_type == 'Depression' %}
+              Based off of your most recent FitBit data, there is a possibility that your elevated BMI can have a reciprocal link to your symptoms of Depression. Several studies (including <a href="https://jamanetwork.com/journals/jamapsychiatry/fullarticle/210608">this one</a>) support the conclusion that obesity may contribute to an increased risk of Depression and Depression can be predictive of developing obesity. 
+            {% elif class_type =='Anxiety' %}
+                Based off of your most recent FitBit data, there is a possibility that your elevated BMI can have a reciprocal link to your symptoms of Anxiety. Several studies (including <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5090775/">this one</a>) support the conclusion that obesity may contribute to an increased risk of Anxiety and Anxiety can be predictive of developing obesity. 
+            {% elif class_type == 'Insomnia' %}
+                Based off of your most recent FitBit data, there is a possibility that your elevated BMI can have a reciprocal link to your symptoms of Insomnia. Several studies (including <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3630986/">this one </a>) support the conclusion that elevated body weight may contribute to an increased risk of Insomnia and Insomnia can be predictive of developing obesity. <br>Research shows that there is a positive correlation between exercise and sleep disorders and that with increased exercise, quality of life and severity outcomes are positively impacted. <br> It is recommended that you adopt a physically active lifestyle to treat your Insomnia and obesity, as well as reduce your risk for the chronic conditions associated with Insomnia. 
+              {% endif %}
+          {% endif %}
+        </p>
+      </div>
+    </div>
+ 
+
+  <h4> <form action = '/getfit' method = 'GET'> <a href = '/getfit' class="btn btn-info" role="button" style="float:right;"> Access more FitBit data</a></form> </h4><br>
+  <h4> <form action = '/newtest' method = 'GET'> <a href = '/newtest' class="btn btn-info" role="button" style="float:right;"> Take a new mental health test</a></form></h4><br>
+  <h4> <form action = '/chartdata' method = 'GET'><a href = '/chartdata' class="btn btn-info" role="button" style="float:right;"> View Chart </a></form></h4><br>
+
+<footer>
+    <div> <br><br>
+                  <form action = "/logout" method = "POST"> 
+                  <input type = "submit" class="btn btn-light"value = "Log Out"> <!--    Show only when user is logged in using JS -->
+                 </form>
+            </div>
+        </footer>
+
+
+{% endblock %}

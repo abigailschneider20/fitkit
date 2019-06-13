@@ -426,8 +426,12 @@ def chart_data():
         first_data = [x[1] for x in firstdata_lst]
         sec_data = [x[1] for x in secdata_lst]
         stats1 = [x for x in first_data if x != None]
+        if stats1:
+            stats1= add_stats(stats1)
+        else:
+            stats1=None
         stats2 = [x for x in sec_data if x != None]
-        stats = add_stats(stats1, stats2)
+        stats2 = add_stats(stats2)
 
         if formatType == 'json':
             return jsonify({
@@ -449,12 +453,13 @@ def chart_data():
                 }
                     }
                 ],
-                "stats":stats
+                "stats1":stats1,
+                "stats2":stats2
                 })
 
 
         return render_template('chartdata.html', labels = date_labels, data1 = first_data, 
-            data2 = sec_data, stats = stats) 
+            data2 = sec_data, stats1 = stats1, stats2=stats2) 
     else:
         flash('You must log in in order to access your data.')
         return redirect('/login')
@@ -554,6 +559,30 @@ def insert_answers_into_db():
     else: 
         flash('Please select a type of test to take.')
         return redirect('/newtest')
+
+def assess_bmi(bmi):
+    if bmi <= 18.5:
+        return 'Underweight'
+    elif bmi > 18.5 and bmi <=24.9:
+        return 'Normal'
+    elif bmi >=25 and bmi<29.9:
+        return 'Overweight'
+    elif bmi >=30:
+        return 'Obese'
+    else:
+        return 'Error'
+
+@app.route('/bmi', methods=['GET'])
+def calculate_bmi():
+    if session.get('user_id') != None:
+        user=User.query.filter_by(user_id=session['user_id']).one()
+        class_type = user.class_type
+        bmi = round((user.weight/(user.height**2)), 1)
+        assessment=assess_bmi(bmi)
+        return render_template('bmi.html', bmi=bmi, assessment=assessment, class_type=class_type)
+    else:
+        flash('You must be logged in to access the BMI calculator.')
+        return redirect('/login')
 
 if __name__ == "__main__":
     phq_model = pickle.load(open('phq.pkl', 'rb'))

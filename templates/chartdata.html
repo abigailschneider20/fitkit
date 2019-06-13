@@ -174,9 +174,8 @@ $(document).on('ready', () => {
       const lengthLabel = fitbitLineChart.data.labels.length;
       const lengthDataset = fitbitLineChart.data.datasets.length;
 
-      const fitdata = data.stats.fit;
-      const testdata = data.stats.test;
-      console.log(data.stats)
+      const fitdata = data.stats2;
+      const testdata = data.stats1;
 
       $('#testmean').html(testdata.mean);
       $('#testmedian').html(testdata.median);
@@ -186,6 +185,7 @@ $(document).on('ready', () => {
       $('#fitmedian').html(fitdata.median);
       $('#fitrange').html(fitdata.range);
       $('#fitstd').html(fitdata.std);
+
 
       for (let i = 0; i<lengthLabel; i++) {
         fitbitLineChart.data.labels.pop();

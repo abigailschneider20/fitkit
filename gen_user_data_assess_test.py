@@ -139,7 +139,7 @@ def assess_gad(score):
         return 'Severe'
 
 
-def add_stats(data1, data2):
+def add_stats(data):
     # np.mean()
 
     # mean : fitbit data
@@ -148,26 +148,17 @@ def add_stats(data1, data2):
     # range()
     # std
 
-    test_score_array = np.array(data1)
+    test_score_array = np.array(data)
     test_mean = np.mean(test_score_array)
-    fit_score_array = np.array(data2)
-    fit_mean = np.mean(fit_score_array)
     test_median = np.median(test_score_array)
-    fit_median = np.median(fit_score_array)
     test_range = np.ptp(test_score_array)
-    fit_range = np.ptp(fit_score_array)
     test_std = np.std(test_score_array)
-    fit_std = np.std(fit_score_array)
-    stats_dict = {'test':{
+    stats_dict = {
                 'mean': int(test_mean),
                 'median': int(test_median),
-                'range': int(test_range),
-                'std': int(test_std)}, 
-                'fit':{
-                'mean': int(fit_mean),
-                'median': int(fit_median),
-                'range': int(fit_range),
-                'std': int(fit_std)
-                }}
+                'range':int(test_range),
+                'std': int(test_std)
+                }
+            
     return stats_dict
     
