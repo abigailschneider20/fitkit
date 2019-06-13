@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 {% block body %}
 <head>
-<script src="https://kit.fontawesome.com/508d817dd4.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.18/r-2.2.2/sc-2.0.0/datatables.min.css"/>
+ 
+  <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.18/r-2.2.2/sc-2.0.0/datatables.min.js"></script>
+
+  <script src="https://kit.fontawesome.com/508d817dd4.js"></script>
 </head>
 <style>
 
@@ -55,8 +59,9 @@
         <h1 class="h2"> Recent FitBit Data</h1>
      </div>
      <div class="table-responsive">
-      <table class="table table-striped table-sm">
+      <table class="table table-striped table-bordered table-sm" id="fitbitdata">
         <thead> FitBit Data
+          {% if user.dailymetrics %}
           <tr> <th> Date </th>
             <th> Steps </th>
             <th> Sleep (mins) </th>
@@ -65,19 +70,22 @@
             <th> Resting Heart Rate </th>
           </tr>
         </thead>
-   
-            {% if user.dailymetrics %}
+
           <tbody>
-              {% for i in range(0,11) %}
+              {% for test in user.dailymetrics %}
           <tr>
-            <td> {{user.dailymetrics[i].date}} </td>
-            <td> {{user.dailymetrics[i].steps}} </td>
-            <td> {{user.dailymetrics[i].sleep}}</td>
-            <td> {{user.dailymetrics[i].mins_sedentary}}</td>
-            <td> {{user.dailymetrics[i].mins_exercise}}</td>
-            <td> {{user.dailymetrics[i].resting_hr}}</td>
+            <td> {{test.date}} </td>
+            <td> {{test.steps}} </td>
+            <td> {{test.sleep}}</td>
+            <td> {{test.mins_sedentary}}</td>
+            <td> {{test.mins_exercise}}</td>
+            <td> {{test.resting_hr}}</td>
           </tr>
              {% endfor %}
+            {% else %}
+              <div> No Available Results <br>
+                <a href='/getfit' role="button" class="btn btn-light" style="float:left;"> Import your FitBit data </a>
+              </div>
           {% endif %}
         </tbody>
       </table>
@@ -85,7 +93,7 @@
     </div>
     </div>
     <div class="table-responsive">
-      <table class="table table-striped table-sm"><br>
+      <table class="table table-striped table-sm" id="phq"><br>
         <thead> PHQ9 Scores
           {% if user.phq %}
           <tr><th> Date </th>
@@ -94,12 +102,13 @@
           </tr>
         </thead>
           <tbody>
-            {% for j in range(0,11) %}
+            {% for test in user.phq %}
             <tr>
-              <td> {{user.phq[j].date}} </td>
-              <td> {{user.phq[j].score}} </td>
-              <td> {{user.phq[j].dep_severity}}</td>
+              <td> {{test.date}} </td>
+              <td> {{test.score}} </td>
+              <td> {{test.dep_severity}}</td>
             </tr>
+          </div>
              {% endfor %}
             {% else %}
             <div>
@@ -110,7 +119,7 @@
         </tbody>         
       </table>
       <div class="table-responsive">
-      <table class="table table-striped table-sm"><br>
+      <table class="table table-striped table-sm" id="gad"><br>
         <thead> GAD7 Scores
           {% if user.gad %}
           <tr><th> Date </th>
@@ -119,11 +128,11 @@
           </tr>
         </thead>
           <tbody>
-            {% for k in range(0,11) %}
+            {% for test in user.gad %}
             <tr>
-              <td> {{user.gad[k].date}} </td>
-              <td> {{user.gad[k].score}} </td>
-              <td> {{user.gad[k].anx_severity}}</td>
+              <td> {{test.date}} </td>
+              <td> {{test.score}} </td>
+              <td> {{test.anx_severity}}</td>
             </tr>
              {% endfor %}
              {% else %}
@@ -134,7 +143,7 @@
         </tbody>         
       </table>
       <div class="table-responsive">
-      <table class="table table-striped table-sm"><br>
+      <table class="table table-striped table-sm" id="sleep"><br>
         <thead> Sleep Questionnaire Scores
           {% if user.sleep %}
           <tr><th> Date </th>
@@ -143,11 +152,11 @@
           </tr>
         </thead>
           <tbody>
-            {% for n in range(0,11) %}
+            {% for test in user.sleep %}
             <tr>
-              <td> {{user.sleep[n].date}} </td>
-              <td> {{user.sleep[n].score}} </td>
-              <td> {{user.sleep[n].insomnia_severity}}</td>
+              <td> {{test.date}} </td>
+              <td> {{test.score}} </td>
+              <td> {{test.insomnia_severity}}</td>
             </tr>
              {% endfor %}
              {% else %}
@@ -168,10 +177,19 @@
 
 <footer>
     <div> <br><br>
-                  <form action = "/logout" method = "POST"> 
-                  <input type = "submit" class="btn btn-light"value = "Log Out"> <!--    Show only when user is logged in using JS -->
-                 </form>
-            </div>
-        </footer>
+        <form action = "/logout" method = "POST"> 
+          <input type = "submit" class="btn btn-light"value = "Log Out"> 
+          </form>
+      </div>
+</footer>
+
+<script>
+  $(document).ready(function(){
+    $('#fitbitdata').DataTable();
+    $('#phq').DataTable();
+    $('#gad').DataTable();
+    $('#sleep').DataTable();
+  });
+</script>
 
 {% endblock %}

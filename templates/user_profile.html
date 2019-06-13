@@ -13,6 +13,9 @@
 .btn-info {
   margin-right:50px;
 }
+.btn-success{
+  margin:0 auto;
+}
 </style>
 <div class="card border-#99D3DF mb-3" style="max-width:18rem;">
   <div class="card-header">Profile</div>
@@ -23,10 +26,16 @@
         <div class="card-title">
             {{user.f_name}} {{user.l_name}}
           </div>
+          {% if user.height and user.weight %}
           <div class="card-text" >
             Height: {{((user.height//0.0254)//12)|int}} ft {{((user.height/0.3048)%1 * 12)|int}} in <br>
             Weight: {{((user.weight)*2.2)|int}} lbs <br>
           </div>
+          {% else %}
+          <div class="card-text"> No height or weight entered <br><br></div>
+            {% endif %}
+            <div class="profile-userbuttons">
+              <a href="/editprofile" class="btn btn-success" role="button"> Edit Profile </a>
         </div>
         <div class="profile-userbuttons">
           <a href= "https://accounts.fitbit.com/login?targetUrl=https%3A%2F%2Fwww.fitbit.com%2Flogin%2Ftransferpage%3Fredirect%3Dhttps%253A%252F%252Fwww.fitbit.com&lcl=en_US" role="button" class="btn btn-danger">Your FitBit Account </a>

@@ -143,6 +143,37 @@ def show_user_profile():
         flash('You must log in in order to view your profile.')
         return redirect('/login')
 
+@app.route('/editprofile', methods=['GET'])
+def edit_profile():
+    if session.get('user_id') !=None:
+        user=User.query.filter(User.user_id==session['user_id']).one()
+        return render_template('editprofile.html', user=user)
+    else:
+        flash('You must log in in order to edit your profile.')
+        return redirect('/login')
+
+@app.route('/editprofile', methods=['POST'])
+def change_profile():
+    user=User.query.filter(User.user_id==session['user_id']).one()
+    f_name=request.form.get('f_name')
+    l_name=request.form.get('l_name')
+    email=request.form.get('email')
+    password=request.form.get('password')
+    feet=int(request.form.get('feet'))
+    inches=int(request.form.get('inches'))
+    weight=int(request.form.get('weight'))
+    weight = int(weight/2.205)
+    height= round(((feet*12)+(inches))*0.0254, 2)
+    user.f_name = f_name
+    user.l_name = l_name
+    user.email=email
+    user.password=password 
+    user.height=height
+    user.weight = weight
+    db.session.commit()
+    flash('You have successfully updated your profile.')
+    return redirect('/dashboard')
+
 @app.route('/getfit')
 def show_fitbit_form():
     """Redirects user to form to access more FitBit data.
@@ -256,7 +287,6 @@ def create_newuser_data(date1, date2):
         new_user_class= numpy.random.choice((classes), p=probs)
         curr_user = User.query.filter(User.user_id == session['user_id']).first()
         curr_user.class_type = new_user_class.class_type
-        print(curr_user.class_type)
         new_user = ""
         for i in range((date2-date1).days + 1):
             date = (date1+timedelta(days=i))
@@ -346,7 +376,6 @@ def predict(date1, date2):
     mins_exercise = numpy.mean(mins_exercise)
     mins_sedentary = numpy.mean(mins_sedentary)
     resting_hr = numpy.mean(resting_hr)
-    print(steps, sleep, mins_sedentary, mins_exercise, resting_hr)
     recs = []
     if steps < 10000:
         recs.append(f'Try walking {int(10000-steps)} more steps daily')
@@ -360,13 +389,10 @@ def predict(date1, date2):
     data = [user_id, user_id, steps, sleep, mins_sedentary, mins_exercise, resting_hr]
     phq_prediction = phq_model.predict([data])
     phq_output = phq_prediction[0]
-    print(phq_output)
     gad_prediction = gad_model.predict([data])
     gad_output = gad_prediction[0]
-    print(gad_output)
     isi_prediction= isi_model.predict([data])
     isi_output = isi_prediction[0]
-    print(isi_output)
 
     prediction = {'phq': phq_output,
                 'gad': gad_output,
@@ -380,86 +406,90 @@ def chart_data():
     """Return biometric data and personal test
      scores to be displayed on a chart"""
     if session.get('user_id') != None:
-        user = User.query.filter(User.user_id == session['user_id']).first()
-        firstchart_type = request.args.get('firstchart_type')
-        secchart_type = request.args.get('secchart_type')
-        formatType = request.args.get('format')
+        if DailyEntry.query.filter(DailyEntry.user_id ==session['user_id']).first() != None:
+            user = User.query.filter(User.user_id == session['user_id']).first()
+            firstchart_type = request.args.get('firstchart_type')
+            secchart_type = request.args.get('secchart_type')
+            formatType = request.args.get('format')
 
-        data_dict = {}
-        first_dict = {}
-        second_dict = {}
+            data_dict = {}
+            first_dict = {}
+            second_dict = {}
 
-        if firstchart_type == 'PHQ9':
-            for i in user.phq:
-                first_dict[str(i.date)] = (int(i.score))
-        elif firstchart_type == 'GAD7':
-            for i in user.gad:
-                first_dict[str(i.date)] = (int(i.score))
-        else:
-            for i in user.sleep:
-                first_dict[str(i.date)] = (int(i.score))
+            if firstchart_type == 'PHQ9':
+                for i in user.phq:
+                    first_dict[str(i.date)] = (int(i.score))
+            elif firstchart_type == 'GAD7':
+                for i in user.gad:
+                    first_dict[str(i.date)] = (int(i.score))
+            else:
+                for i in user.sleep:
+                    first_dict[str(i.date)] = (int(i.score))
 
-        if secchart_type =='Resting Heart Rate':
-            for j in user.dailymetrics:
-                second_dict[str(j.date)] = (int(j.resting_hr))
-        elif secchart_type == 'Steps':
-            for j in user.dailymetrics:
-                second_dict[str(j.date)] = (int(j.steps))
-        elif secchart_type == 'Mins Slept':
-            for j in user.dailymetrics:
-                second_dict[str(j.date)] = (int(j.sleep))
-        elif secchart_type == 'Mins Exercise':
-            for j in user.dailymetrics:
-                second_dict[str(j.date)] = (int(j.mins_exercise))
-        else:
-            for j in user.dailymetrics:
-                second_dict[str(j.date)] = (int(j.mins_sedentary))
-      
-        data_dict['data1'] = first_dict
-        data_dict['data2'] = second_dict
-        secdata_lst = sorted(data_dict['data2'].items())
-        date_labels = [x[0] for x in secdata_lst] #second dataset will always have more dates
-        for date in date_labels:
-            value = data_dict['data1'].get(date, None)
-            data_dict['data1'][date] = value
-        firstdata_lst = sorted(data_dict['data1'].items())
-        first_data = [x[1] for x in firstdata_lst]
-        sec_data = [x[1] for x in secdata_lst]
-        stats1 = [x for x in first_data if x != None]
-        if stats1:
-            stats1= add_stats(stats1)
-        else:
-            stats1=None
-        stats2 = [x for x in sec_data if x != None]
-        stats2 = add_stats(stats2)
+            if secchart_type =='Resting Heart Rate':
+                for j in user.dailymetrics:
+                    second_dict[str(j.date)] = (int(j.resting_hr))
+            elif secchart_type == 'Steps':
+                for j in user.dailymetrics:
+                    second_dict[str(j.date)] = (int(j.steps))
+            elif secchart_type == 'Mins Slept':
+                for j in user.dailymetrics:
+                    second_dict[str(j.date)] = (int(j.sleep))
+            elif secchart_type == 'Mins Exercise':
+                for j in user.dailymetrics:
+                    second_dict[str(j.date)] = (int(j.mins_exercise))
+            else:
+                for j in user.dailymetrics:
+                    second_dict[str(j.date)] = (int(j.mins_sedentary))
+          
+            data_dict['data1'] = first_dict
+            data_dict['data2'] = second_dict
+            secdata_lst = sorted(data_dict['data2'].items())
+            date_labels = [x[0] for x in secdata_lst] #second dataset will always have more dates
+            for date in date_labels:
+                value = data_dict['data1'].get(date, None)
+                data_dict['data1'][date] = value
+            firstdata_lst = sorted(data_dict['data1'].items())
+            first_data = [x[1] for x in firstdata_lst]
+            sec_data = [x[1] for x in secdata_lst]
+            stats1 = [x for x in first_data if x != None]
+            if stats1:
+                stats1= add_stats(stats1)
+            else:
+                stats1=None
+            stats2 = [x for x in sec_data if x != None]
+            stats2 = add_stats(stats2)
 
-        if formatType == 'json':
-            return jsonify({
-                "labels": date_labels,
-                "datasets": [
-                    {
-                        "label": firstchart_type,
-                        "data": first_data,
-                        "colorOpts": {}
-                    },
-                    {
-                        "label": secchart_type,
-                        "data": sec_data,
-                        "colorOpts": {                    
-                  "backgroundColor": "#99D3DF",
-                  "borderColor": "#99D3DF",
-                  "pointHoverBackgroundColor": "#99D3DF",
-                  "pointHoverBorderColor": "#99D3DF",
-                }
+            if formatType == 'json':
+                return jsonify({
+                    "labels": date_labels,
+                    "datasets": [
+                        {
+                            "label": firstchart_type,
+                            "data": first_data,
+                            "colorOpts": {}
+                        },
+                        {
+                            "label": secchart_type,
+                            "data": sec_data,
+                            "colorOpts": {                    
+                      "backgroundColor": "#99D3DF",
+                      "borderColor": "#99D3DF",
+                      "pointHoverBackgroundColor": "#99D3DF",
+                      "pointHoverBorderColor": "#99D3DF",
                     }
-                ],
-                "stats1":stats1,
-                "stats2":stats2
-                })
+                        }
+                    ],
+                    "stats1":stats1,
+                    "stats2":stats2
+                    })
 
 
-        return render_template('chartdata.html', labels = date_labels, data1 = first_data, 
-            data2 = sec_data, stats1 = stats1, stats2=stats2) 
+            return render_template('chartdata.html', labels = date_labels, data1 = first_data, 
+                data2 = sec_data, stats1 = stats1, stats2=stats2) 
+        else:
+            flash('You must first import FitBit data in order to view your charts.')
+            return redirect('/getfit')
     else:
         flash('You must log in in order to access your data.')
         return redirect('/login')
@@ -503,7 +533,6 @@ def insert_answers_into_db():
             dep_severity = dep_severity)
         db.session.add(new_test)
         db.session.commit()
-        print(new_test.dep_severity)
         flash(f'You successfully submitted your PHQ9 results. Your score is {score} which indicates a Depression severity of "{dep_severity}"')
         return redirect ('/dashboard')
     elif test_type == 'gad':
@@ -576,13 +605,18 @@ def assess_bmi(bmi):
 def calculate_bmi():
     if session.get('user_id') != None:
         user=User.query.filter_by(user_id=session['user_id']).one()
-        class_type = user.class_type
-        bmi = round((user.weight/(user.height**2)), 1)
-        assessment=assess_bmi(bmi)
-        return render_template('bmi.html', bmi=bmi, assessment=assessment, class_type=class_type)
+        if user.weight and user.height:
+            class_type = user.class_type
+            bmi = round((user.weight/(user.height**2)), 1)
+            assessment=assess_bmi(bmi)
+            return render_template('bmi.html', bmi=bmi, assessment=assessment, class_type=class_type)
+        else:
+            flash('You must update your weight and height before accessing the BMI calculator.')
+            return redirect('/editprofile')
     else:
         flash('You must be logged in to access the BMI calculator.')
         return redirect('/login')
+
 
 if __name__ == "__main__":
     phq_model = pickle.load(open('phq.pkl', 'rb'))

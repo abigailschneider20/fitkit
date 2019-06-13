@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 
 {% block body %}
-
+<head>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.18/r-2.2.2/sc-2.0.0/datatables.min.css"/>
+ 
+  <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.18/r-2.2.2/sc-2.0.0/datatables.min.js"></script>
+</head>
 <style>
   .card {
     text-align: center;
@@ -51,21 +55,33 @@
       </div>
     </div>
 
-{% for i in show_fitbit_data_lst %}
-  <div class="card border-light mb-3" id="fitcard" style="max-width:18rem;">
-      <p class="card-text">
-        <b>Date: {{i.date}}</b> <br>
-        Steps: {{i.steps}}  <br>
-        Sleep: {{i.sleep}} <br>
-        Sedentary Minutes: {{i.mins_sedentary}}<br>
-        Active Minutes: {{i.mins_exercise}} <br>
-        Resting Heart Rate: {{i.resting_hr}} <br></p>
-      </div>
- 
-  {% endfor %}
-<br>
-</ul>
-</div>
+<div class="table-responsive">
+  <table class="table table-striped table-sm" id="results"><br>
+        <thead> Your FitBit Data
+          <tr>
+            <th> Date </th>
+            <th> Steps </th>
+            <th> Sleep </th>
+            <th> Sedentary Minutes </th>
+            <th> Active Minutes </th>
+            <th> Resting Heart Rate </th>
+          </tr>
+        </thead>
+          <tbody>
+            {% for i in show_fitbit_data_lst %}
+            <tr>
+              <td> {{i.date}} </td>
+              <td> {{i.steps}} </td>
+              <td> {{i.sleep}} </td>
+              <td> {{i.mins_sedentary}}</td>
+              <td> {{i.mins_exercise}}</td>
+              <td> {{i.resting_hr}}</td>
+            </tr>
+             {% endfor %}
+           </tbody>
+         </table>
+       </div>
+
 
   <h4><form action = '/getfit' method = 'GET'> <a href = '/getfit' class="btn btn-info" role="button" style="float:right;"> Access more FitBit data</a></form> </h4><br>
   <h4> <form action = '/newtest' method = 'GET'> <a href = '/newtest' class="btn btn-info" role="button" style="float:right;"> Take a new mental health test</a></form></h4><br>
@@ -80,10 +96,9 @@
         </footer>
 
 <script>
-  const activepage=1;
-  function paginate(showPageId) {
-    activepage=showPageid;
-    $('')
-  }
+  $(document).ready(function(){
+    $('#results').DataTable();
+  });
+
 </script>
 {% endblock %}

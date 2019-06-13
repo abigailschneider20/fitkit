@@ -132,6 +132,16 @@ def load_dailyentries():
 
     db.session.commit()
 
+def set_val_user_id():
+#     """Sets value for the next user_id after seeding database"""
+
+    result = db.session.query(func.max(User.user_id)).one()
+    max_id = int(result[0])
+
+    query = "SELECT setval('users_user_id_seq', :new_id)"
+    db.session.execute(query, {'new_id': max_id + 1})
+    db.session.commit()
+
 
 if __name__ == "__main__":
     connect_to_db(app)

@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block body %}
+<style>
+  .card {
+    text-align: center;
+    margin:0 auto;
+    float:none;
+    margin-bottom:10px;
+  }
+.profile-userbuttons{
+  margin-bottom:20px;
+}
+.btn-info {
+  margin-right:50px;
+}
+.btn-success{
+  margin:0 auto;
+}
+</style>
+  <div class="container">
+    <h1>Edit Profile</h1>
+    <hr>
+  <div class="row">
+      <div class="col-md-3">
+        <div class="text-center">
+          <img src="static/fit.png" class="img-responsive" alt="">
+        </div>
+      </div>
+      <div class="col-md-9 personal-info">
+        <h3>Personal Info</h3>
+        <form action ="/editprofile" method = "POST">
+          <div class="form-group">
+            <label class="col-lg-3 control-label">First name:</label>
+            <div class="col-lg-8">
+              <input type="text" value= {{user.f_name}} name="f_name">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-lg-3 control-label">Last name:</label>
+            <div class="col-lg-8">
+              <input type="text" value={{user.l_name}} name="l_name">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-lg-3 control-label">Email:</label>
+            <div class="col-lg-8">
+              <input class="form-control" type="text" value={{user.email}} name="email">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-md-3 control-label">Password:</label>
+            <div class="col-md-8">
+              <input type="password" value={{user.password}} name="password">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-md-3 control-label">Height: </label> 
+              {% if user.height %}
+              <div class="col-md-8">
+                <input type="number" value={{((user.height//0.0254)//12)|int}} name="feet"> (ft) <br>
+                  <input type="number" value={{((user.height/0.3048)%1 * 12)|int}} name="inches"> (in)
+                </div>
+                {% else %}
+                <div class="col-md-8">
+                  <input type="number" name="feet"> (ft) <br>
+                  <input type="number" name="inches"> (in)
+                </div>
+                {% endif %}
+              </div>
+              <div class="form-group">
+                <label class="col-md-3 control-label">Weight: </label>
+                {% if user.weight %}
+                <div class="col-md-8">
+                  <input type="number" value={{((user.weight)*2.2)|int}} name="weight">(lbs)
+                </div>
+                {% else %}
+                <div class="col-md-8">
+                  <input type="number" name="weight"> (lbs)
+                </div>
+                {% endif %}
+              </div>
+          <div class="form-group">
+            <label class="col-md-3 control-label"></label>
+            <div class="col-md-8">
+              <span></span>
+              <button class="btn btn-lg btn-success" type="submit">Save Changes
+            </button>
+            </div>
+          </div>
+        </form>
+      </div>
+  </div>
+</div>
+<hr>
+
+
+  <h4><form action = '/getfit' method = 'GET'> <a href = '/getfit' class="btn btn-info" role="button" style="float:right;"> Access more FitBit data</a></form> </h4><br>
+  <h4> <form action = '/newtest' method = 'GET'> <a href = '/newtest' class="btn btn-info" role="button" style="float:right;"> Take a new mental health test</a></form></h4><br>
+  <h4> <form action = '/chartdata' method = 'GET'><a href = '/chartdata' class="btn btn-info" role="button" style="float:right;"> View Chart </a></form></h4><br>
+
+<footer>
+    <div> <br><br>
+                  <form action = "/logout" method = "POST"> 
+                  <input type = "submit" class="btn btn-light"value = "Log Out"> <!--    Show only when user is logged in using JS -->
+                 </form>
+            </div>
+        </footer>
+
+{% endblock %}
