@@ -303,6 +303,7 @@ def create_newuser_data(date1, date2):
 
     return show_fitbit_data_lst
 
+
 def parse_rawfitbitdata(raw_data, i):
     #parse raw fitbit data
 
@@ -321,18 +322,32 @@ def parse_rawfitbitdata(raw_data, i):
 
     return new_entry
 
-def check_existing_entries(date1, date2):
+def check_existing_entries(date1, date2, class_type):
+    """Checks database for existing FitKit entries"""
     show_fitbit_data_lst = []
-    raw_data = download_fitbitdata(date1, date2)
-    for i in range(0, (date2-date1).days+1) :
-        existing_entry = DailyEntry.query.filter(DailyEntry.date == (date2 - timedelta(days = i))).first()
-        if existing_entry == None:
-            new_entry = parse_rawfitbitdata(raw_data, i)
-            show_fitbit_data_lst.append(new_entry)
-        else:
-            show_fitbit_data_lst.append(existing_entry)
+    if session['user_id']==1:
+        raw_data = download_fitbitdata(date1, date2)
+        for i in range(0, (date2-date1).days+1) :
+            existing_entry = DailyEntry.query.filter(DailyEntry.user_id == session['user_id'],DailyEntry.date == (date2 - timedelta(days = i))).first()
+            if existing_entry == None:
+                new_entry = parse_rawfitbitdata(raw_data, i)
+                show_fitbit_data_lst.append(new_entry)
+            else:
+                show_fitbit_data_lst.append(existing_entry)
+    else:
+        for i in range(0, (date2-date1).days+1):
+            existing_entry = DailyEntry.query.filter(DailyEntry.user_id==session['user_id'],DailyEntry.date == (date2 - timedelta(days=i))).first()
+            if existing_entry==None:
+                classes_dict = {'Anxiety': Anxiety, 'Depression':Depression, 'Insomnia':Insomnia, 'UnaffectedUser': UnaffectedUser}
+                cls_type = classes_dict[class_type]
+                cls_entry = cls_type(session['user_id'])
+                new_entry = DailyEntry(user_id=session['user_id'], date=(date2 - timedelta(days = i)), sleep=cls_entry.mins_sleep, steps=cls_entry.steps, mins_exercise=cls_entry.mins_exercise, mins_sedentary=cls_entry.mins_sedentary, resting_hr=cls_entry.resting_hr)
+                show_fitbit_data_lst.append(new_entry)
+            else:
+                show_fitbit_data_lst.append(existing_entry)
 
     return show_fitbit_data_lst
+
 
 
 @app.route('/fitbitdata', methods = ['GET'])
@@ -341,21 +356,31 @@ def fitbitdata():
     date2 = request.args.get('date2')
     date1 = datetime.strptime(date1, '%Y-%m-%d').date()
     date2 = datetime.strptime(date2, '%Y-%m-%d').date()
+    user = User.query.filter(User.user_id==session['user_id']).first()
+    class_type = user.class_type
+    prediction=''
 
     show_fitbit_data_lst = []
     if date1 and date2:
         if session['user_id'] == 1:
-            show_fitbit_data_lst = check_existing_entries(date1, date2)
+            show_fitbit_data_lst = check_existing_entries(date1, date2, class_type)
             prediction=predict(date1, date2)
         else:
-            show_fitbit_data_lst = create_newuser_data(date1, date2)
-            assess_new_testscores()
-            prediction=predict(date1, date2)
+            if class_type == None:
+                show_fitbit_data_lst = create_newuser_data(date1, date2)
+                assess_new_testscores()
+                prediction=predict(date1, date2)
+            else:
+                show_fitbit_data_lst=check_existing_entries(date1, date2, class_type)
+                prediction=predict(date1, date2)
+
+         
         return render_template('showfitbitdata.html', show_fitbit_data_lst = show_fitbit_data_lst, date1 = date1, date2=date2, prediction = prediction)
 
     else:
         flash('Please provide all of the required information')
         return redirect('/getfit')
+
 
 
 def predict(date1, date2):
