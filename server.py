@@ -647,7 +647,6 @@ if __name__ == "__main__":
     phq_model = pickle.load(open('phq.pkl', 'rb'))
     gad_model = pickle.load(open('gad.pkl', 'rb'))
     isi_model = pickle.load(open('isi.pkl', 'rb'))
-    app.debug = True
     # make sure templates, etc. are not cached in debug mode
     app.jinja_env.auto_reload = app.debug
 
@@ -656,4 +655,4 @@ if __name__ == "__main__":
     # Use the DebugToolbar
     DebugToolbarExtension(app)
 
-    app.run(port=5000, host='0.0.0.0')
+    app.run()

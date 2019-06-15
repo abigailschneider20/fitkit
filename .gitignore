@@ -8,6 +8,7 @@ app-env.sh
 chart.html
 templates/CHARTDATADATA.html
 fitbit1.sql
+fitbit.sql
 
 
 # To Do:

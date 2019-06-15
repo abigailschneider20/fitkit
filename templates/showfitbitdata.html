@@ -30,7 +30,7 @@
         <h5 class="card-title"> Based on your biometric data, </h5>
           <p class="card-text">
           {% if 1 in prediction.values() %}
-          You are <b> likely </b> to exhibit symptoms of
+          You are <b> likely </b> to exhibit symptoms of 
           {% if prediction['phq']==1 %}
           <ul><b>Depression</b></ul>
           {% endif %}
@@ -41,7 +41,7 @@
           <ul><b>Insomnia</b></ul>
           {% endif %}
         {% else %}
-        you are <b> unlikely </b> to exhibit signs of Depression, Anxiety, or Insomnia. 
+        you are <b> unlikely </b> to exhibit signs of Depression, Anxiety, or Insomnia. <br>
         {% endif %}
           It is recommended that you: <br>
           {% if prediction['recs'] %}
