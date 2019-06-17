@@ -1,10 +1,10 @@
-from sqlalchemy import func
+from sqlalchemy import func 
 
-from model import connect_to_db, db, User, DailyEntry, GAD, PHQ, Sleep
-from server import app
+from model import connect_to_db, db, User, DailyEntry, GAD, PHQ, Sleep 
+from server import app 
 
 
-def load_users():
+def load_users(): 
     """Load users from u.user into database."""
 
     # Delete all rows in table, so if we need to run this a second time,
@@ -32,7 +32,7 @@ def load_users():
 
 
 
-def load_phq():
+def load_phq(): 
     """Load PHQ9 info from u.phq into database."""
     PHQ.query.delete()
 
@@ -60,7 +60,7 @@ def load_phq():
 
     db.session.commit()
 
-def load_gad():
+def load_gad(): 
     """Load GAD7 info from u.gad into database."""
     GAD.query.delete()
 
@@ -85,7 +85,7 @@ def load_gad():
         db.session.add(gad)
         
     db.session.commit()
-def load_sleep():
+def load_sleep(): 
     """Load sleep questionnaire info from u.sleep into database."""
     Sleep.query.delete()
 
@@ -111,7 +111,7 @@ def load_sleep():
         
     db.session.commit()
 
-def load_dailyentries():
+def load_dailyentries(): 
     """Load daily metrics from u.dailymetrics into database."""
 
     DailyEntry.query.delete()
@@ -132,7 +132,7 @@ def load_dailyentries():
 
     db.session.commit()
 
-def set_val_user_id():
+def set_val_user_id(): 
 #     """Sets value for the next user_id after seeding database"""
 
     result = db.session.query(func.max(User.user_id)).one()
@@ -143,7 +143,7 @@ def set_val_user_id():
     db.session.commit()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
     connect_to_db(app)
 
     # In case tables haven't been created, create them

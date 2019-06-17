@@ -32,12 +32,12 @@ app.jinja_env.undefined = StrictUndefined
 
 @app.route('/')
 def index():
-    """Homepage."""
+    """Renders homepage."""
     return render_template('homepage.html')
 
 @app.route('/register', methods = ['GET'])
 def register_form():
-    """Register new users"""
+    """Register new users if user_id is not already in session"""
     if session.get('user_id') !=None:
         flash('You have already logged in.')
         return redirect('/dashboard')
@@ -45,7 +45,7 @@ def register_form():
 
 @app.route('/register', methods = ['POST'])
 def process_registration():
-    """Process new user registration"""
+    """Process new user registration for users who are not already logged in"""
     if session.get('user_id') != None:
         flash('You have already logged in.')
         return redirect('/dashboard')
@@ -57,6 +57,7 @@ def process_registration():
         age = request.form.get('age')
         sex = request.form.get('sex')
 
+        #inputs new user data into database
         new_user = User(email = email, password = password, f_name = f_name,
             l_name = l_name, age = age, sex = sex)
         db.session.add(new_user)
@@ -66,11 +67,13 @@ def process_registration():
 
         flash('Welcome!')
 
+        #redirects newly registered user to HIPAA form for acknowledgement
         return render_template('/hipaa.html')
 
 @app.route('/hipaa', methods = ['POST'])
 def hipaa_form():
-    """Redirects user to mandatory HIPAA Acknowledgement form"""
+    """Redirects user to mandatory HIPAA Acknowledgement form and 
+    changes boolean in database to True once acknowledged"""
     if request.form.getlist('acknowledged-hipaa'):
         user = User.query.filter(User.user_id == session['user_id']).first()
         user.has_signed_hipaa = True
@@ -84,7 +87,7 @@ def hipaa_form():
 
 @app.route('/login', methods = ['GET'])
 def login_form():
-    """Sends user to login form to fill out"""
+    """Sends user to login form to fill out if not already logged in"""
     if session.get('user_id') != None:
         flash('You have already logged in.')
         return redirect('/dashboard')
@@ -96,13 +99,15 @@ def login():
     email = request.form.get('email')
     password = request.form.get('password')
 
-
+    #users will have unique emails
     user = User.query.filter_by(email=email).first()
 
+    #checks to see if email entered matches one in database
     if not user:
         flash("Incorrect email. Please try again.")
         return redirect("/login")
 
+    #checks to see if password entered matches one affiliated with user email in database
     if user.password != password:
         flash("Incorrect password. Please try again.")
         return redirect("/login")
@@ -114,7 +119,7 @@ def login():
 
 @app.route('/logout', methods = ['POST'])
 def logout():
-    """Logs user out."""
+    """Logs user out unless already logged out/not signed in."""
 
     if (session.get('user_id', False)) != False:
         del session['user_id']
@@ -125,17 +130,20 @@ def logout():
 
 @app.route('/dashboard')
 def dashboard():
-    """Shows user dashboard for signed in user"""
+    """Shows signed in user dashboard"""
     if session.get('user_id') != None:
-        user_id = session.get('user_id')
+        user_id = session.get('user_id') #query of dailymetrics and user information for table display on dashboard
         user = User.query.options(db.joinedload('dailymetrics')).get(user_id)
+
         return render_template("dashboard.html", user=user)
     else:
+        #redirects users who have not yet logged in
         flash('You must log in in order to view your dashboard.')
         return redirect ('/login')
 
 @app.route('/profile')
 def show_user_profile():
+    """Shows signed in user profile"""
     if session.get('user_id') != None:
         user=User.query.filter_by(user_id=session['user_id']).one()
         return render_template("user_profile.html", user=user)
@@ -145,6 +153,7 @@ def show_user_profile():
 
 @app.route('/editprofile', methods=['GET'])
 def edit_profile():
+    """Shows signed-in user their modifiable profile"""
     if session.get('user_id') !=None:
         user=User.query.filter(User.user_id==session['user_id']).one()
         return render_template('editprofile.html', user=user)
@@ -154,6 +163,7 @@ def edit_profile():
 
 @app.route('/editprofile', methods=['POST'])
 def change_profile():
+    """Allows user to modify elements of their profile and post changes to database"""
     user=User.query.filter(User.user_id==session['user_id']).one()
     f_name=request.form.get('f_name')
     l_name=request.form.get('l_name')
@@ -162,8 +172,8 @@ def change_profile():
     feet=int(request.form.get('feet'))
     inches=int(request.form.get('inches'))
     weight=int(request.form.get('weight'))
-    weight = int(weight/2.205)
-    height= round(((feet*12)+(inches))*0.0254, 2)
+    weight = int(weight/2.205) #stores weight input as kg for easier calculation of BMI
+    height= round(((feet*12)+(inches))*0.0254, 2) #stores height input as m for easier calculation of BMI
     user.f_name = f_name
     user.l_name = l_name
     user.email=email
@@ -188,7 +198,7 @@ def show_fitbit_form():
         return redirect('/login')
 
 def download_fitbitdata(date1, date2):
-    #downloads all types of fitbit data for date range
+    #downloads FitBit data for date range for user with user_id 1 (which is accessible via FitBit API).
 
     activity_type_dict = {"sleep": (f"https://api.fitbit.com/1.2/user/-/sleep/date/{date1}/{date2}.json"),
                     "activities-heart": (f"https://api.fitbit.com/1/user/-/activities/heart/date/{date1}/{date2}.json"), 
@@ -201,7 +211,7 @@ def download_fitbitdata(date1, date2):
     headers = {'Authorization': 'Bearer ' + FITBIT_TOKEN}
 
     raw_data = {}
-
+    #compiles responses for each of the separate requests into one dictionary for easier access/parsing
     for k in activity_type_dict:
         response = requests.get(activity_type_dict[k], headers = headers)
         data = response.json()
@@ -210,8 +220,11 @@ def download_fitbitdata(date1, date2):
     return raw_data
 
 def assess_new_testscores():
+    """Takes randomly-generated PHQ, GAD, and/or ISI test answers of instances for user's specific class and computes
+    score and severity of mental health condition"""
     curr_user = User.query.filter(User.user_id == session['user_id']).first()
     class_type = curr_user.class_type
+    #uses class_type affiliated with new users to calculate scores and assesses severity
     if class_type == 'Depression':
         incomplete_PHQ = PHQ.query.filter(PHQ.user_id == session['user_id'], PHQ.score == None).all()
         for entry in incomplete_PHQ:
@@ -228,6 +241,7 @@ def assess_new_testscores():
             entry.score =(entry.q1_answer + entry.q2_answer + entry.q3_answer + entry.q4_answer + entry.q5_answer + entry.q6_answer + entry.q7_answer)
             entry.insomnia_severity = assess_sleep(entry.score)
     elif class_type == 'Unaffected':
+        #Unaffected users have PHQ, GAD, and ISIs automatically synthesized upon instantiation
         incomplete_PHQ = PHQ.query.filter(PHQ.user_id == session['user_id'], PHQ.score == None).all()
         for entry in incomplete_PHQ:
             entry.score =(entry.q1_answer + entry.q2_answer + entry.q3_answer + entry.q4_answer + entry.q5_answer + entry.q6_answer + entry.q7_answer + entry.q8_answer + entry.q9_answer)
@@ -278,13 +292,13 @@ def create_new_testscores(curr_user, new_user_data, date):
         return new_PHQ, new_GAD, new_ISI
 
 def create_newuser_data(date1, date2):
-    #creates new user data to mock import of FitBit data
+    #Synthesizes new user data (either a user of class Anxiety, Depression, Insomnia, or Unaffected) to mock import of FitBit data
     show_fitbit_data_lst = []
     classes = (Anxiety, Depression, Insomnia, UnaffectedUser)
-    probs = (0.18, 0.08, 0.25, 0.49)
-    existing_entry = DailyEntry.query.filter(DailyEntry.user_id == session['user_id'], DailyEntry.date == date1).first()
+    probs = (0.18, 0.08, 0.25, 0.49) #incidence of Anxiety in US is 18%, Depression is 8%, Insomnia is 25%
+    existing_entry = DailyEntry.query.filter(DailyEntry.user_id == session['user_id'], DailyEntry.date == date1).first() #checks for existing entry
     if existing_entry == None:
-        new_user_class= numpy.random.choice((classes), p=probs)
+        new_user_class= numpy.random.choice((classes), p=probs) #randomly assigns class type to new user
         curr_user = User.query.filter(User.user_id == session['user_id']).first()
         curr_user.class_type = new_user_class.class_type
         new_user = ""
@@ -305,10 +319,10 @@ def create_newuser_data(date1, date2):
 
 
 def parse_rawfitbitdata(raw_data, i):
-    #parse raw fitbit data
-
+    #Parses raw JSON data from FitBit API with user with user_id 1.
+    #Adds new entry for user
     new_entry = DailyEntry(user_id = session['user_id'], date = raw_data['sleep'][i]['dateOfSleep'], sleep = raw_data['sleep'][i]['minutesAsleep'])
-    new_entry.mins_exercise = 0
+    new_entry.mins_exercise = 0 #sets mins_exercise to 0 (lightly, fairly, and very active minutes added later on)
     new_entry.resting_hr = raw_data['activities-heart'][i]['value']['restingHeartRate']
     new_entry.steps = raw_data['activities-steps'][i]['value']
     new_entry.mins_sedentary = raw_data['activities-minutesSedentary'][i]['value']
@@ -323,7 +337,8 @@ def parse_rawfitbitdata(raw_data, i):
     return new_entry
 
 def check_existing_entries(date1, date2, class_type):
-    """Checks database for existing FitKit entries"""
+    """Checks database for existing FitKit entries for user with user_id 1 (which is accessible via FitBit API) and all
+    other new users"""
     show_fitbit_data_lst = []
     if session['user_id']==1:
         raw_data = download_fitbitdata(date1, date2)
@@ -352,27 +367,28 @@ def check_existing_entries(date1, date2, class_type):
 
 @app.route('/fitbitdata', methods = ['GET'])
 def fitbitdata():
+    """Processes request of specific biometric data for date range"""
     date1 = request.args.get('date1') 
     date2 = request.args.get('date2')
-    date1 = datetime.strptime(date1, '%Y-%m-%d').date()
+    date1 = datetime.strptime(date1, '%Y-%m-%d').date() #converts inputs to date format
     date2 = datetime.strptime(date2, '%Y-%m-%d').date()
     user = User.query.filter(User.user_id==session['user_id']).first()
-    class_type = user.class_type
+    class_type = user.class_type #takes into consideration class type for users with user_id != 1 and adds appropriate data 
     prediction=''
 
     show_fitbit_data_lst = []
     if date1 and date2:
         if session['user_id'] == 1:
-            show_fitbit_data_lst = check_existing_entries(date1, date2, class_type)
-            prediction=predict(date1, date2)
+            show_fitbit_data_lst = check_existing_entries(date1, date2, class_type) #checks for existing entries of user with id #1
+            prediction=predict(date1, date2) #uses logistic regression model to predict PHQ, GAD, ISI scores (therefore, likelihood of exhibiting symptoms of Depression, Insomnia, Anxiety)
         else:
             if class_type == None:
-                show_fitbit_data_lst = create_newuser_data(date1, date2)
-                assess_new_testscores()
-                prediction=predict(date1, date2)
+                show_fitbit_data_lst = create_newuser_data(date1, date2) #newly-registered users will not have a class assigned yet and will have new data generated
+                assess_new_testscores() #will also have test scores added and assessed
+                prediction=predict(date1, date2) #uses logistic regression model to predict PHQ, GAD, ISI scores
             else:
-                show_fitbit_data_lst=check_existing_entries(date1, date2, class_type)
-                prediction=predict(date1, date2)
+                show_fitbit_data_lst=check_existing_entries(date1, date2, class_type) #other uses who have previously accessed data will check for existing entries and return those
+                prediction=predict(date1, date2) #use logistic regression model to predict PHQ, GAD, ISI scores
 
          
         return render_template('showfitbitdata.html', show_fitbit_data_lst = show_fitbit_data_lst, date1 = date1, date2=date2, prediction = prediction)
@@ -384,10 +400,10 @@ def fitbitdata():
 
 
 def predict(date1, date2):
-    #uses logistic regression models to predict mental health test scores based on biometric data
-    recent1 = DailyEntry.query.filter(DailyEntry.user_id == session['user_id'], DailyEntry.date>=date1).all()
+    #uses logistic regression models to predict mental health test scores based on biometric data (resting heart rate, steps, mins sedentary, mins exercise, sleep)
+    recent1 = DailyEntry.query.filter(DailyEntry.user_id == session['user_id'], DailyEntry.date>=date1).all() #checks for metric entries for specified dates
     recent2 = DailyEntry.query.filter(DailyEntry.user_id ==session['user_id'], DailyEntry.date<=date2).all()
-    recent_entries = set(recent1+recent2)
+    recent_entries = set(recent1+recent2) #ensures no repeat of dates
     steps, sleep, mins_exercise, mins_sedentary, resting_hr = [], [], [], [], []
     for entry in recent_entries:
         steps.append(entry.steps)
@@ -396,12 +412,12 @@ def predict(date1, date2):
         mins_sedentary.append(entry.mins_sedentary)
         resting_hr.append(entry.resting_hr)
 
-    steps = numpy.mean(steps)
+    steps = numpy.mean(steps) #takes means of metrics for predictions
     sleep= numpy.mean(sleep)
     mins_exercise = numpy.mean(mins_exercise)
     mins_sedentary = numpy.mean(mins_sedentary)
     resting_hr = numpy.mean(resting_hr)
-    recs = []
+    recs = [] #initializes empty list for personalized recommendations based off of prediction and user's biometric data
     if steps < 10000:
         recs.append(f'Try walking {int(10000-steps)} more steps daily')
     if sleep < 420:
@@ -412,11 +428,11 @@ def predict(date1, date2):
         recs.append(f'Consider speaking to your doctor about your elevated resting heart rate and ways to improve your overall cardiovascuclar health')
     user_id = session['user_id']
     data = [user_id, user_id, steps, sleep, mins_sedentary, mins_exercise, resting_hr]
-    phq_prediction = phq_model.predict([data])
+    phq_prediction = phq_model.predict([data]) #predicts PHQ score (affected or unaffected) based on biometric data
     phq_output = phq_prediction[0]
-    gad_prediction = gad_model.predict([data])
+    gad_prediction = gad_model.predict([data]) #predicts GAD score (affected or unaffected) based on biometric data
     gad_output = gad_prediction[0]
-    isi_prediction= isi_model.predict([data])
+    isi_prediction= isi_model.predict([data]) #predicts ISI score (affected or unaffected) based on biometric data
     isi_output = isi_prediction[0]
 
     prediction = {'phq': phq_output,
@@ -429,7 +445,7 @@ def predict(date1, date2):
 @app.route('/chartdata')
 def chart_data():
     """Return biometric data and personal test
-     scores to be displayed on a chart"""
+     scores to be displayed on a chart (using ChartJS)"""
     if session.get('user_id') != None:
         if DailyEntry.query.filter(DailyEntry.user_id ==session['user_id']).first() != None:
             user = User.query.filter(User.user_id == session['user_id']).first()
@@ -441,6 +457,7 @@ def chart_data():
             first_dict = {}
             second_dict = {}
 
+            #adds appropriate data to respective dictionaries with dates as keys
             if firstchart_type == 'PHQ9':
                 for i in user.phq:
                     first_dict[str(i.date)] = (int(i.score))
@@ -466,7 +483,7 @@ def chart_data():
             else:
                 for j in user.dailymetrics:
                     second_dict[str(j.date)] = (int(j.mins_sedentary))
-          
+            #adds data1 (selected test type scores) and data2 (selected biometric data) to one dictionary for easier access 
             data_dict['data1'] = first_dict
             data_dict['data2'] = second_dict
             secdata_lst = sorted(data_dict['data2'].items())
@@ -474,7 +491,7 @@ def chart_data():
             for date in date_labels:
                 value = data_dict['data1'].get(date, None)
                 data_dict['data1'][date] = value
-            firstdata_lst = sorted(data_dict['data1'].items())
+            firstdata_lst = sorted(data_dict['data1'].items()) #sorts data by date
             first_data = [x[1] for x in firstdata_lst]
             sec_data = [x[1] for x in secdata_lst]
             stats1 = [x for x in first_data if x != None]
@@ -522,6 +539,7 @@ def chart_data():
 
 @app.route('/newtest', methods = ['GET'])
 def navigate_to_tests():
+    """Shows user PHQ9, GAD7, and ISI tests to take"""
     if session.get('user_id') != None:
         return render_template('newtest.html')
     else:
@@ -530,6 +548,7 @@ def navigate_to_tests():
 
 @app.route('/newtest', methods = ['POST'])
 def insert_answers_into_db():
+    """Inserts user answers, scores, and mental health severity from PHQ9, GAD7, ISI tests into database"""
     test_type = request.form.get('testtype')
 
     if test_type == 'phq':
@@ -615,6 +634,19 @@ def insert_answers_into_db():
         return redirect('/newtest')
 
 def assess_bmi(bmi):
+    """Categorizes user as Underweight, Normal, Overweight, or Obese based off of BMI calculation. Specified on BMI
+    HTML form that user input must be an integer. 
+    >>> assess_bmi(17)
+    'Underweight'
+    >>> assess_bmi(18.6)
+    'Normal'
+    >>> assess_bmi(20)
+    'Normal'
+    >>> assess_bmi(27)
+    'Overweight'
+    >>> assess_bmi(30)
+    'Obese'
+    """
     if bmi <= 18.5:
         return 'Underweight'
     elif bmi > 18.5 and bmi <=24.9:
@@ -628,6 +660,7 @@ def assess_bmi(bmi):
 
 @app.route('/bmi', methods=['GET'])
 def calculate_bmi():
+    """Calculates user's BMI using BMI formula and renders HTML page with recommendations based off of their biometric data"""
     if session.get('user_id') != None:
         user=User.query.filter_by(user_id=session['user_id']).one()
         if user.weight and user.height:
@@ -644,6 +677,7 @@ def calculate_bmi():
 
 
 if __name__ == "__main__":
+    #loads logistic regression models into database for use in predicting mental health conditions based off of biometric data
     phq_model = pickle.load(open('phq.pkl', 'rb'))
     gad_model = pickle.load(open('gad.pkl', 'rb'))
     isi_model = pickle.load(open('isi.pkl', 'rb'))
@@ -652,7 +686,12 @@ if __name__ == "__main__":
 
     connect_to_db(app)
 
-    # Use the DebugToolbar
+    # Use the DebugToolbar during development
     DebugToolbarExtension(app)
+
+    import doctest
+
+    result = doctest.testmod()
+
 
     app.run()
