@@ -1,7 +1,7 @@
 # FitKit
 A full-stack web application built in four weeks for a Hackbright Academy final project.
 
-#Description
+#**Description**
 FitKit allows users to import biometric data using the FitBit API and take standard personal health questionnaires 
 (such as the Patient Health Questionnaire) to assess their mental health. Once all of the biometric and personal data
 is gathered, a user can view a graph of how their biometric data correlates with changes in their mental health status. 
@@ -12,7 +12,8 @@ Anxiety, and Insomnia based off of their resting heart rate, sleep, and activity
 
 ![Image of FitKit Homepage](static/images/homepage.png)
 
-#Technologies Used
+
+#**Technologies Used**
 *FitBit API 
 *Python3 
 *JSON 
@@ -54,8 +55,8 @@ Anxiety, and Insomnia based off of their resting heart rate, sleep, and activity
     *When a new user registers and imports their data, one of the aforementioned "types" is assigned based on the probability 
     of developing one of the respective mental health condition and biometric data and mental health test scores are 
     synthesized for the specified date range.
-
     ![Image of Import FitBit Data](static/images/ImportFitBitData.png)
+    
 
 *Once a user specifies the date range for their FitBit data, their data loads into the database and onto the results page. 
   *A prediction is visible to the user which provides further insight into their mental health. 
