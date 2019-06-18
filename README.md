@@ -10,7 +10,7 @@ Anxiety, and Insomnia based off of their resting heart rate, sleep, and activity
 
 [Link to FitKit](http://fitkit.org)
 
-[Image of FitKit Homepage](static/images/homepage.png)
+![Image of FitKit Homepage](static/images/homepage.png)
 
 #Technologies Used
 *FitBit API 
